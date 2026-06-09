@@ -1,0 +1,101 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{FuzzyFit: Adaptive Workout Intensity \& Recovery Guide\\
+{\footnotesize \textsuperscript{*}CENG 386 - Fuzzy Logic Final Project Report}
+}
+
+\author{\IEEEauthorblockN{Your Name Surname}
+\IEEEauthorblockA{\textit{Department of Computer Engineering} \\
+\textit{University Name}\\
+City, Country \\
+your.email@university.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+This paper presents a Fuzzy Logic-based Personal Fitness Assistant designed to determine optimal workout intensity and volume based on a user's daily physiological and psychological state. Unlike static workout plans, this system models the ``fuzzy'' nature of human readiness using variables such as Sleep Quality, Muscle Soreness, Energy Level, and Stress Level. The system utilizes Mamdani inference and centroid defuzzification to generate crisp workout recommendations. Furthermore, the project features a modern, interactive web-based graphical user interface designed in accordance with Gestalt UI/UX principles, demonstrating a real-world software engineering approach as an alternative to traditional MATLAB environments.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Fuzzy Logic, Mamdani Inference, Human Physiology, Gestalt Principles, Scikit-Fuzzy, UI/UX.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Traditional fitness applications and training schedules often rely on rigid, binary logic or predefined calendars. For example, a schedule may mandate a heavy lower-body workout strictly on a Monday. However, human recovery is inherently ambiguous. A user might feel ``somewhat tired'' or have had an ``average night of sleep.'' Fuzzy logic is uniquely suited to handle this linguistic ambiguity \cite{zadeh1965fuzzy}. 
+
+The objective of this project is to build a robust Fuzzy Inference System (FIS) that maps linguistic inputs regarding a user's daily status to continuous workout recommendations. The system ensures that athletes do not overtrain on bad days and capitalize on days when their physical readiness is peaking.
+
+\section{System Architecture and Fuzzification}
+The proposed FIS takes four crisp physiological and psychological inputs and produces two crisp outputs (Workout Intensity and Workout Volume). We mapped these variables using Triangular (\texttt{trimf}) and Trapezoidal (\texttt{trapmf}) membership functions to ensure smooth transitions between states.
+
+\subsection{Inputs (Antecedents)}
+The system evaluates four main independent variables defined over a universe of discourse from 0 to 10:
+\begin{enumerate}
+    \item \textbf{Sleep Quality:} Poor [0,0,3,5], Average [4,6,8], Good [7,9,10,10].
+    \item \textbf{Muscle Soreness:} Low [0,0,2,4], Moderate [3,5,7], High [6,8,10,10].
+    \item \textbf{Energy Level:} Deficit [0,0,3,5], Balanced [4,6,8], Surplus [7,9,10,10].
+    \item \textbf{Stress Level:} Low [0,0,2,4], Normal [3,5,7], High [6,8,10,10].
+\end{enumerate}
+
+\subsection{Outputs (Consequents)}
+The outputs dictate the parameters of the suggested workout:
+\begin{enumerate}
+    \item \textbf{Workout Intensity (0-100\%):} Very Light, Light, Moderate, High, Maximum.
+    \item \textbf{Workout Volume (0-120 Min):} Low, Medium, High.
+\end{enumerate}
+
+\section{Rule Base and Inference Engine}
+The system uses the \textbf{Mamdani Inference Method}. A comprehensive set of 18 rules was developed using expert knowledge to cover the input space and prevent ``dead zones.''
+
+\subsection{Rule Examples}
+\begin{itemize}
+    \item \textbf{Rule 1 (Extreme Fatigue):} IF Sleep is Poor OR Soreness is High OR Stress is High THEN Intensity is Very Light and Volume is Low.
+    \item \textbf{Rule 2 (Optimal State):} IF Sleep is Good AND Soreness is Low AND Energy is Surplus AND Stress is Low THEN Intensity is Maximum and Volume is High.
+\end{itemize}
+
+\subsection{Aggregation and Implication}
+The inference engine utilizes the MIN operator for the fuzzy AND logic and the MAX operator for the fuzzy OR logic. The implication method used for rule evaluation is minimum truncation, ensuring that the consequent is clipped at the degree of truth of the antecedent.
+
+\section{Defuzzification and Control Surfaces}
+To convert the aggregated fuzzy output sets back into actionable, crisp values, the \textbf{Centroid (Center of Gravity)} defuzzification method is used by default.
+
+\subsection{3D Control Surfaces}
+To analyze the non-linear decision boundaries of the system, 3D control surfaces were plotted. For example, by fixing Stress and Soreness at 5.0, a 3D surface shows how the interaction between Sleep Quality and Energy Level directly manipulates Workout Intensity. The gradient of the surface validates that higher sleep and energy yield an exponentially higher intensity recommendation without sudden discontinuous jumps.
+
+\section{Technology Stack and UI/UX Justification}
+While academic environments primarily utilize the MATLAB Fuzzy Logic Toolbox, this project was developed using \textbf{Python (\texttt{scikit-fuzzy})} combined with \textbf{Streamlit} and \textbf{Plotly}. This decision was driven by several practical and UI/UX-focused requirements:
+
+\subsection{Gestalt Principles in Interface Design}
+The user interface was architected following Gestalt principles to ensure cognitive ease:
+\begin{itemize}
+    \item \textbf{Law of Common Region:} Inputs and outputs are strictly encapsulated in separate bounded containers.
+    \item \textbf{Symmetry and Balance:} The screen is split into equal halves, balancing user input actions with the resulting outputs.
+\end{itemize}
+MATLAB's App Designer lacks the CSS capabilities required to seamlessly implement these modern web-standard UX principles.
+
+\subsection{Interactive Data Visualization}
+By employing \texttt{Plotly}, the 3D control surfaces are fully interactive (zoom, pan, rotate) directly within the browser, providing a superior analytical experience compared to static MATLAB \texttt{surf()} plots.
+
+\section{Conclusion}
+The FuzzyFit project successfully demonstrates the application of fuzzy set theory to human physiology. By utilizing Python and web frameworks, the project not only fulfills the mathematical requirements of a Mamdani FIS but also delivers a polished, user-centric software product that adheres to modern UI/UX design standards.
+
+\begin{thebibliography}{00}
+\bibitem{zadeh1965fuzzy} L. A. Zadeh, ``Fuzzy sets,'' \textit{Information and Control}, vol. 8, no. 3, pp. 338--353, 1965.
+\bibitem{scikit-fuzzy} J. Warner et al., ``scikit-fuzzy: Fuzzy logic toolkit for SciPy,'' 2012. [Online]. Available: https://github.com/scikit-fuzzy/scikit-fuzzy
+\end{thebibliography}
+
+\end{document}
