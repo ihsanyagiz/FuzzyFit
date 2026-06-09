@@ -1,0 +1,15 @@
+[theme]
+# Primary accent color for interactive elements
+primaryColor = "#00F0FF"
+
+# Background color for the main content area (Dark Slate)
+backgroundColor = "#0b1121"
+
+# Background color used for the sidebar and most interactive widgets (Slightly lighter slate)
+secondaryBackgroundColor = "#111827"
+
+# Text color
+textColor = "#E2E8F0"
+
+# Font family for all text in the app
+font = "sans serif"
