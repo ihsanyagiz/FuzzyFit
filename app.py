@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import datetime
 from fuzzy_engine import FuzzyFitSystem
+from skfuzzy.control.visualization import FuzzyVariableVisualizer
 
 # Page Configuration
 st.set_page_config(page_title="FuzzyFit Assistant", page_icon="⚡", layout="wide")
@@ -584,32 +585,48 @@ st.divider()
 with st.expander(t["details_header"], expanded=True):
     st.markdown(t["details_desc"])
     
+    # Sync simulation inputs and reset to the user's selected defuzzification method
+    engine.fitness_sim.input['Sleep Quality'] = sleep_val
+    engine.fitness_sim.input['Muscle Soreness'] = soreness_val
+    engine.fitness_sim.input['Energy Level'] = energy_val
+    engine.fitness_sim.input['Stress Level'] = stress_val
+    
+    if model_type == "Mamdani":
+        engine.intensity.defuzzify_method = defuzz_method
+        engine.volume.defuzzify_method = defuzz_method
+        try:
+            engine.fitness_sim.compute()
+        except Exception:
+            pass
+            
     with st.container(border=True):
         graph_col1, graph_col2 = st.columns(2)
         
         with graph_col1:
             st.markdown(t["int_out"])
             if model_type == "Mamdani":
-                fig_int, ax_int = plt.subplots(figsize=(8, 4))
                 try:
-                    engine.intensity.view(sim=engine.fitness_sim)
-                except (KeyError, ValueError, Exception):
+                    visualizer_int = FuzzyVariableVisualizer(engine.intensity)
+                    fig_int, ax_int = visualizer_int.view(sim=engine.fitness_sim)
+                    fig_int.set_size_inches(8, 4)
+                    st.pyplot(fig_int)
+                    plt.close(fig_int)
+                except Exception as e:
                     st.warning("Could not generate graph (No rule intersection).")
-                st.pyplot(plt.gcf())
-                plt.close(fig_int)
             else:
                 st.info(t["sugeno_msg"])
             
         with graph_col2:
             st.markdown(t["vol_out"])
             if model_type == "Mamdani":
-                fig_vol, ax_vol = plt.subplots(figsize=(8, 4))
                 try:
-                    engine.volume.view(sim=engine.fitness_sim)
-                except (KeyError, ValueError, Exception):
+                    visualizer_vol = FuzzyVariableVisualizer(engine.volume)
+                    fig_vol, ax_vol = visualizer_vol.view(sim=engine.fitness_sim)
+                    fig_vol.set_size_inches(8, 4)
+                    st.pyplot(fig_vol)
+                    plt.close(fig_vol)
+                except Exception as e:
                     pass
-                st.pyplot(plt.gcf())
-                plt.close(fig_vol)
             else:
                 st.info(t["sugeno_msg"])
             
@@ -618,26 +635,42 @@ with st.expander(t["details_header"], expanded=True):
         inputs_col1, inputs_col2 = st.columns(2)
         
         with inputs_col1:
-            fig1, ax1 = plt.subplots(figsize=(6, 3))
-            engine.sleep.view()
-            st.pyplot(plt.gcf())
-            plt.close(fig1)
+            try:
+                visualizer_sleep = FuzzyVariableVisualizer(engine.sleep)
+                fig_sleep, ax_sleep = visualizer_sleep.view(sim=engine.fitness_sim)
+                fig_sleep.set_size_inches(6, 3)
+                st.pyplot(fig_sleep)
+                plt.close(fig_sleep)
+            except Exception:
+                st.warning("Could not generate Sleep Quality graph.")
             
-            fig2, ax2 = plt.subplots(figsize=(6, 3))
-            engine.energy.view()
-            st.pyplot(plt.gcf())
-            plt.close(fig2)
+            try:
+                visualizer_energy = FuzzyVariableVisualizer(engine.energy)
+                fig_energy, ax_energy = visualizer_energy.view(sim=engine.fitness_sim)
+                fig_energy.set_size_inches(6, 3)
+                st.pyplot(fig_energy)
+                plt.close(fig_energy)
+            except Exception:
+                st.warning("Could not generate Energy Level graph.")
             
         with inputs_col2:
-            fig3, ax3 = plt.subplots(figsize=(6, 3))
-            engine.soreness.view()
-            st.pyplot(plt.gcf())
-            plt.close(fig3)
+            try:
+                visualizer_soreness = FuzzyVariableVisualizer(engine.soreness)
+                fig_soreness, ax_soreness = visualizer_soreness.view(sim=engine.fitness_sim)
+                fig_soreness.set_size_inches(6, 3)
+                st.pyplot(fig_soreness)
+                plt.close(fig_soreness)
+            except Exception:
+                st.warning("Could not generate Muscle Soreness graph.")
             
-            fig4, ax4 = plt.subplots(figsize=(6, 3))
-            engine.stress.view()
-            st.pyplot(plt.gcf())
-            plt.close(fig4)
+            try:
+                visualizer_stress = FuzzyVariableVisualizer(engine.stress)
+                fig_stress, ax_stress = visualizer_stress.view(sim=engine.fitness_sim)
+                fig_stress.set_size_inches(6, 3)
+                st.pyplot(fig_stress)
+                plt.close(fig_stress)
+            except Exception:
+                st.warning("Could not generate Stress Level graph.")
 
 st.divider()
 st.markdown(f"### {t['surf_header']}")
