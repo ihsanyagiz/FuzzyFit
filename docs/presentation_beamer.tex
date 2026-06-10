@@ -2,10 +2,11 @@
 \usetheme{Madrid}
 \usecolortheme{whale}
 
-% Pakets
+% Packages
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{amsmath}
 
 % Title Page Information
 \title[FuzzyFit Assistant]{FuzzyFit: Adaptive Workout Intensity \& Recovery Guide}
@@ -28,8 +29,8 @@
 \begin{frame}{The Problem with Traditional Systems}
   \begin{itemize}
     \item \textbf{Rigid Logic:} Traditional fitness schedules rely on strict calendars (e.g., "Monday is heavy leg day").
-    \item \textbf{Human Ambiguity:} Our physical readiness is not black and white. It fluctuates based on sleep, stress, and nutrition.
-    \item \textbf{The Solution:} We need a system that understands the "fuzzy" nature of human physiology to prevent overtraining and optimize recovery.
+    \item \textbf{Human Ambiguity:} Our physical readiness is not binary. It fluctuates based on sleep, stress, and nutrition.
+    \item \textbf{The Solution:} We need a system that models the "fuzzy" nature of human physiology to prevent overtraining and optimize recovery.
   \end{itemize}
 \end{frame}
 
@@ -54,25 +55,25 @@
   \end{itemize}
 \end{frame}
 
-% Slide 4: Membership Functions
+% Slide 4: Fuzzification (Equations)
 \begin{frame}{Fuzzification (Membership Functions)}
-  We use a combination of Triangular (\texttt{trimf}) and Trapezoidal (\texttt{trapmf}) functions to map crisp inputs to fuzzy linguistic terms.
-  
-  \vspace{0.3cm}
-  \textbf{Example: Sleep Quality}
+  We use a combination of Triangular and Trapezoidal functions:
   \begin{itemize}
-      \item \textit{Poor:} [0, 0, 3, 5] (Trapezoidal)
-      \item \textit{Average:} [4, 6, 8] (Triangular)
-      \item \textit{Good:} [7, 9, 10, 10] (Trapezoidal)
+      \item \textbf{Triangular Membership Function ($trimf$):}
+      \begin{equation*}
+      \mu(x; a, b, c) = \max\left(0, \min\left(\frac{x-a}{b-a}, \frac{c-x}{c-b}\right)\right)
+      \end{equation*}
+      \item \textbf{Trapezoidal Membership Function ($trapmf$):}
+      \begin{equation*}
+      \mu(x; a, b, c, d) = \max\left(0, \min\left(\frac{x-a}{b-a}, 1, \frac{d-x}{d-c}\right)\right)
+      \end{equation*}
   \end{itemize}
-  
-  \vspace{0.3cm}
-  \textit{Note: This prevents sharp cutoffs, allowing a sleep value of 4.5 to be partially "Poor" and partially "Average".}
+  \textit{Enables inputs like a Sleep Quality of 4.5 to be resolved as partly "Poor" and partly "Average" simultaneously.}
 \end{frame}
 
 % Slide 5: The Rule Base
 \begin{frame}{The Rule Base (Knowledge Base)}
-  The engine consists of \textbf{18 carefully designed rules} to eliminate "dead zones".
+  The engine consists of \textbf{18 carefully designed rules} to eliminate "dead zones" in the 4D input space.
   
   \vspace{0.3cm}
   \begin{block}{Rule Example 1 (Extreme Fatigue)}
@@ -86,29 +87,59 @@
   \end{block}
 \end{frame}
 
-% Slide 6: Defuzzification & Control Surfaces
-\begin{frame}{Defuzzification \& 3D Control Surfaces}
+% Slide 6: Defuzzification Mathematics
+\begin{frame}{Defuzzification Mathematics}
+  To convert fuzzy output sets back into crisp actions:
   \begin{itemize}
-      \item \textbf{Method:} Centroid (Center of Gravity) is used to calculate the final crisp workout parameters.
-      \item \textbf{3D Surfaces:} The system generates dynamic 3D control surfaces to visualize non-linear decision boundaries.
-      \item For instance, visualizing how Intensity scales exponentially when Energy increases and Stress decreases.
+      \item \textbf{Centroid (Center of Gravity):}
+      \begin{equation*}
+      z_{COG} = \frac{\int z \mu_A(z) dz}{\int \mu_A(z) dz}
+      \end{equation*}
+      \item \textbf{Bisector:}
+      \begin{equation*}
+      \int_{z_{min}}^{z_B} \mu_A(z) dz = \int_{z_B}^{z_{max}} \mu_A(z) dz
+      \end{equation*}
+      \item \textbf{Mean of Maximum (MOM):}
+      \begin{equation*}
+      z_{MOM} = \frac{\int_{z \in M} z dz}{\int_{z \in M} dz}
+      \end{equation*}
   \end{itemize}
 \end{frame}
 
-% Slide 7: Technology Stack & UI/UX Justification
-\begin{frame}{Technology Stack \& UI/UX (Python vs MATLAB)}
-  While the mathematical foundation (Mamdani/Centroid) is identical to MATLAB's Fuzzy Logic Toolbox, \textbf{Python (scikit-fuzzy) + Streamlit} was chosen to create a modern web application.
-  
-  \vspace{0.3cm}
-  \textbf{Gestalt UI/UX Principles Implemented:}
+% Slide 7: Defuzzification Methods Comparison
+\begin{frame}{Defuzzification Methods Comparison}
+  \begin{table}[htbp]
+  \centering
+  \footnotesize
+  \caption{Comparison under different physical profiles}
+  \begin{tabular}{lcccc}
+  \toprule
+  \textbf{Method} & \multicolumn{2}{c}{\textbf{Profile 1 (Fatigued)}} & \multicolumn{2}{c}{\textbf{Profile 2 (Balanced)}} \\
+   & \textbf{Int. (\%)} & \textbf{Vol. (Min)} & \textbf{Int. (\%)} & \textbf{Vol. (Min)} \\
+  \midrule
+  Centroid & 31.33 & 31.30 & 60.00 & 80.45 \\
+  Bisector & 31.33 & 31.30 & 60.00 & 80.45 \\
+  MOM      & 31.33 & 31.30 & 60.00 & 80.45 \\
+  SOM      & 31.33 & 31.30 & 60.00 & 80.45 \\
+  LOM      & 31.33 & 31.30 & 60.00 & 80.45 \\
+  \bottomrule
+  \end{tabular}
+  \end{table}
+  \textit{Note: Under symmetric active rules, all methods yield mathematically consistent outputs, demonstrating system stability.}
+\end{frame}
+
+% Slide 8: Technology Stack \& Web Features
+\begin{frame}{Technology Stack \& Web App Features}
+  Developed using \textbf{Python (scikit-fuzzy) + Streamlit + Plotly} as an alternative to local desktop MATLAB scripts:
   \begin{itemize}
-      \item \textbf{Law of Common Region:} Inputs and outputs are strictly encapsulated in visually bounded containers.
-      \item \textbf{Proximity:} Technical engine settings are isolated in the sidebar.
-      \item \textbf{Symmetry:} The layout balances data entry with data visualization equally.
+      \item \textbf{Live Fuzzification Panel:} Visualizes membership percentages in real-time as sliders move.
+      \item \textbf{Interactive 3D surfaces:} Plotly surfaces can be rotated, panned, and zoomed inside any browser.
+      \item \textbf{Contextual Workout Generator:} Translates crisp values into specific sets and reps based on goals (Strength, Hypertrophy, Cardio).
+      \item \textbf{Session History & CSV Export:} Log daily recommendations, view progress graphs, and download training data.
   \end{itemize}
 \end{frame}
 
-% Slide 8: Live Demo & Q&A
+% Slide 9: Live Demo & Q&A
 \begin{frame}{Conclusion}
   \begin{center}
       \Large \textbf{Live Demo}

@@ -130,3 +130,29 @@ class FuzzyFitSystem:
             'intensity': intensity,
             'volume': volume
         }
+
+    def get_membership_values(self, sleep_val, soreness_val, energy_val, stress_val):
+        """Returns the membership value (degree of activation) for each linguistic category of each input variable."""
+        return {
+            'Sleep Quality': {
+                'Poor': float(fuzz.interp_membership(self.sleep.universe, self.sleep['Poor'].mf, sleep_val)),
+                'Average': float(fuzz.interp_membership(self.sleep.universe, self.sleep['Average'].mf, sleep_val)),
+                'Good': float(fuzz.interp_membership(self.sleep.universe, self.sleep['Good'].mf, sleep_val))
+            },
+            'Muscle Soreness': {
+                'Low': float(fuzz.interp_membership(self.soreness.universe, self.soreness['Low'].mf, soreness_val)),
+                'Moderate': float(fuzz.interp_membership(self.soreness.universe, self.soreness['Moderate'].mf, soreness_val)),
+                'High': float(fuzz.interp_membership(self.soreness.universe, self.soreness['High'].mf, soreness_val))
+            },
+            'Energy Level': {
+                'Deficit': float(fuzz.interp_membership(self.energy.universe, self.energy['Deficit'].mf, energy_val)),
+                'Balanced': float(fuzz.interp_membership(self.energy.universe, self.energy['Balanced'].mf, energy_val)),
+                'Surplus': float(fuzz.interp_membership(self.energy.universe, self.energy['Surplus'].mf, energy_val))
+            },
+            'Stress Level': {
+                'Low': float(fuzz.interp_membership(self.stress.universe, self.stress['Low'].mf, stress_val)),
+                'Normal': float(fuzz.interp_membership(self.stress.universe, self.stress['Normal'].mf, stress_val)),
+                'High': float(fuzz.interp_membership(self.stress.universe, self.stress['High'].mf, stress_val))
+            }
+        }
+

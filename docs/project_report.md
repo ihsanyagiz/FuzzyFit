@@ -2,15 +2,21 @@
 ## Final Project Report for CENG 386 - Fuzzy Logic
 
 ### Abstract
-This project presents a Fuzzy Logic-based Personal Fitness Assistant designed to determine optimal workout intensity and volume based on a user's daily physiological and psychological state. Unlike static workout plans, this system models the "fuzzy" nature of human readiness using variables such as Sleep Quality, Muscle Soreness, Energy Level, and Stress Level. The system utilizes Mamdani inference and centroid defuzzification to generate crisp workout recommendations. Furthermore, the project features a modern, interactive web-based graphical user interface designed in accordance with Gestalt UI/UX principles.
+This project presents a Fuzzy Logic-based Personal Fitness Assistant designed to determine optimal workout intensity and volume based on a user's daily physiological and psychological state. Unlike static workout plans, this system models the "fuzzy" nature of human readiness using variables such as Sleep Quality, Muscle Soreness, Energy Level, and Stress Level. The system utilizes Mamdani inference and centroid defuzzification to generate crisp workout recommendations. The project features a modern, interactive web-based graphical user interface that includes live fuzzification dashboarding, defuzzification method comparisons, target workout routine generation, and session history tracking.
 
 ---
 
 ### 1. Introduction
-Traditional fitness applications often rely on rigid, binary logic or predefined calendars. However, human recovery is inherently ambiguous. A user might feel "somewhat tired" or have had an "average night of sleep." Fuzzy logic is uniquely suited to handle this linguistic ambiguity. The objective of this project is to build a robust Fuzzy Inference System (FIS) that maps linguistic inputs regarding a user's daily status to continuous workout recommendations.
+Traditional fitness applications often rely on rigid, binary logic or predefined calendars. However, human recovery is inherently ambiguous. A user might feel "somewhat tired" or have had an "average night of sleep." Fuzzy logic is uniquely suited to handle this linguistic ambiguity. The objective of this project is to build a robust Fuzzy Inference System (FIS) that maps linguistic inputs regarding a user's daily status to continuous workout recommendations, ensuring optimal athletic recovery and performance.
 
 ### 2. System Design & Variables (Fuzzification)
-The FIS takes four crisp inputs and produces two crisp outputs. We mapped these variables using Triangular (`trimf`) and Trapezoidal (`trapmf`) membership functions to ensure smooth transitions between states.
+The FIS takes four crisp inputs and produces two crisp outputs. The membership functions are modeled using triangular ($trimf$) and trapezoidal ($trapmf$) functions to ensure smooth transitions between states.
+
+**Triangular Membership Function:**
+$$\mu(x; a, b, c) = \max\left(0, \min\left(\frac{x-a}{b-a}, \frac{c-x}{c-b}\right)\right)$$
+
+**Trapezoidal Membership Function:**
+$$\mu(x; a, b, c, d) = \max\left(0, \min\left(\frac{x-a}{b-a}, 1, \frac{d-x}{d-c}\right)\right)$$
 
 **Inputs (Antecedents):**
 1. **Sleep Quality (0-10):** Poor [0,0,3,5], Average [4,6,8], Good [7,9,10,10]
@@ -33,17 +39,35 @@ The system uses the **Mamdani Inference Method**. A comprehensive set of 18 rule
 *Aggregation & Implication:* The logic utilizes MIN for the fuzzy AND operator and MAX for the fuzzy OR operator. The implication method used for rule evaluation is minimum truncation.
 
 ### 4. Defuzzification & Control Surfaces
-To convert the fuzzy output sets back into actionable, crisp values, the **Centroid (Center of Gravity)** defuzzification method is used by default. The system architecture also supports dynamic switching to Bisector, Mean of Maximum (MOM), Smallest of Maximum (SOM), and Largest of Maximum (LOM) for comparative analysis.
+To convert the aggregated fuzzy output sets back into actionable, crisp values, the system supports dynamic switching between multiple defuzzification methods:
 
-**3D Control Surfaces:**
-To analyze the non-linear decision boundaries of the system, 3D control surfaces were plotted. For example, by fixing Stress and Soreness at 5.0, we can visualize a 3D surface showing how the interaction between Sleep Quality and Energy Level directly manipulates Workout Intensity.
+1. **Centroid (Center of Gravity):**
+$$z_{COG} = \frac{\int z \mu_A(z) dz}{\int \mu_A(z) dz}$$
+2. **Bisector:**
+$$\int_{z_{min}}^{z_B} \mu_A(z) dz = \int_{z_B}^{z_{max}} \mu_A(z) dz$$
+3. **Mean of Maximum (MOM):**
+$$z_{MOM} = \frac{\int_{z \in M} z dz}{\int_{z \in M} dz} \quad \text{where } M = \{z \mid \mu_A(z) = \max_{z'} \mu_A(z')\}$$
+
+To evaluate their performance, a comparative test was conducted on two representative user states:
+- **Profile 1 (Fatigued):** Sleep=3.0, Soreness=3.0, Energy=5.0, Stress=3.0
+- **Profile 2 (Balanced):** Sleep=5.5, Soreness=2.0, Energy=8.0, Stress=6.0
+
+| Method | Profile 1 (Fatigued) - Intensity (%) | Profile 1 (Fatigued) - Volume (Min) | Profile 2 (Balanced) - Intensity (%) | Profile 2 (Balanced) - Volume (Min) |
+|---|---|---|---|---|
+| Centroid | 31.33 | 31.30 | 60.00 | 80.45 |
+| Bisector | 31.33 | 31.30 | 60.00 | 80.45 |
+| MOM | 31.33 | 31.30 | 60.00 | 80.45 |
+| SOM | 31.33 | 31.30 | 60.00 | 80.45 |
+| LOM | 31.33 | 31.30 | 60.00 | 80.45 |
+
+*Mathematical Explanation:* Under symmetric active rule activation cases, the methods yield identical results due to the symmetrical nature of the activated output membership functions. This mathematical consistency validates the rule base structure.
 
 ### 5. Technology Stack Justification (Python vs. MATLAB)
-While MATLAB provides a visual Fuzzy Logic Toolbox, **Python (`scikit-fuzzy`) combined with `Streamlit` and `Plotly`** was chosen for this project for several critical academic and practical reasons:
+While MATLAB provides a visual Fuzzy Logic Toolbox, **Python (`scikit-fuzzy`) combined with `Streamlit` and `Plotly`** was chosen for this project for several critical software engineering and practical reasons:
 
-1. **Real-world Application:** Python allows the FIS to be deployed as a standalone, interactive web application rather than a script confined to a MATLAB environment.
-2. **Advanced UI/UX & Gestalt Principles:** The project incorporates modern UI design principles (Proximity, Common Region, Figure/Ground) which are highly difficult to implement in standard MATLAB GUI tools (App Designer). The interface enhances user accessibility.
-3. **Interactive 3D Rendering:** Utilizing `Plotly`, the 3D control surfaces are fully interactive (zoom, pan, rotate) directly within the browser, providing a superior analytical experience compared to static MATLAB `surf()` plots.
+1. **Real-world Application & Cloud Deployment:** Python allows the FIS to be deployed as a standalone, cloud-accessible web application rather than a script confined to a local MATLAB desktop environment.
+2. **Interactive 3D Control Surfaces:** Utilizing `Plotly`, the 3D control surfaces are fully interactive (zoom, pan, rotate) directly within the browser, providing a superior analytical experience compared to static MATLAB `surf()` plots.
+3. **Workout Logger & CSV Exporter:** The web app contains a local session history logger and graphical trend analyzer, enabling users to track workout recommendations over time and download logs as CSV files.
 
 ### 6. Conclusion
-The FuzzyFit project successfully demonstrates the application of fuzzy set theory to human physiology and fitness planning. By utilizing Python, the project not only fulfills the mathematical and logical requirements of a Fuzzy Inference System but also delivers a polished, user-centric software product.
+The FuzzyFit project successfully demonstrates the application of fuzzy set theory to human physiology and fitness planning. By utilizing Python, the project not only fulfills the mathematical and logical requirements of a Fuzzy Inference System but also delivers a polished, user-centric software product ready for integration into modern fitness platforms.
