@@ -122,11 +122,9 @@ with col1:
                                         ["Chest (Göğüs)", "Back (Sırt)", "Shoulders (Omuz)", "Legs (Bacak)", "Biceps (Pazı)", "Triceps (Arka Kol)", "Core (Karın)"],
                                         default=["Chest (Göğüs)", "Back (Sırt)", "Legs (Bacak)"])
         
-        # New Feature: Add Cardio checkbox
+        # Add Cardio checkbox
         add_cardio = st.checkbox("🏃 Add Cardio Session / Kardiyo Ekle", value=False,
                                  help="Aktif edilirse antrenman süresinin %30'u kardiyoya ayrılır ve ayrı olarak gösterilir.")
-                               
-        calculate_btn = st.button("🚀 Calculate Optimal Workout", use_container_width=True)
 
 # Pool of general exercises for each muscle group
 EXERCISE_POOL = {
@@ -267,163 +265,159 @@ def generate_workout_routine_dynamic(intensity, volume, target_muscles, add_card
         
     return routine_title, exercises, cardio_recommendation
 
+# Dynamic Evaluation of Fuzzy Logic (Runs automatically on slider change)
+result = engine.evaluate(sleep_val, soreness_val, energy_val, stress_val, defuzz_method=defuzz_method)
+intensity_res = result['intensity']
+volume_res = result['volume']
+
 with col2:
     # Common Region: Grouping outputs inside a bounded container
     with st.container(border=True):
         st.markdown("### 🎯 Workout Recommendation (Outputs)")
         
-        if calculate_btn:
-            with st.spinner("Computing Fuzzy Inference..."):
-                result = engine.evaluate(sleep_val, soreness_val, energy_val, stress_val, defuzz_method=defuzz_method)
-                intensity_res = result['intensity']
-                volume_res = result['volume']
-                
-                # Similarity: Metrics have consistent typography and glow
-                metric_col1, metric_col2 = st.columns(2)
-                metric_col1.metric("Recommended Intensity", f"{intensity_res:.1f} %")
-                metric_col2.metric("Recommended Volume", f"{volume_res:.1f} Min")
-                
-                st.success(f"Inference completed successfully! (Method: {defuzz_method.upper()})")
-                
-                # Dynamic Workout Generator based on Selected Muscle Groups
-                st.markdown("---")
-                st.markdown("### 🏃 Actionable Workout Protocol")
-                routine_desc, exercises_list, cardio_rec = generate_workout_routine_dynamic(intensity_res, volume_res, target_muscles, add_cardio)
-                st.write(f"**{routine_desc}**")
-                
-                df_exercises = pd.DataFrame(exercises_list)
-                st.table(df_exercises)
-                
-                if cardio_rec:
-                    st.markdown("#### 🏃 Cardio Session Finisher")
-                    st.table(pd.DataFrame([cardio_rec]))
-                
-                # Logging Feature
-                if st.button("💾 Save Recommendation to History Log", use_container_width=True):
-                    log_entry = {
-                        "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "Sleep Quality": sleep_val,
-                        "Muscle Soreness": soreness_val,
-                        "Energy Level": energy_val,
-                        "Stress Level": stress_val,
-                        "Target Muscles": ", ".join([m.split(" ")[0] for m in target_muscles]),
-                        "Cardio Included": "Yes" if add_cardio else "No",
-                        "Defuzz Method": defuzz_method.upper(),
-                        "Intensity (%)": round(intensity_res, 1),
-                        "Volume (Min)": round(volume_res, 1)
-                    }
-                    st.session_state.workout_logs.append(log_entry)
-                    st.toast("Workout logged successfully! Check the history dashboard at the bottom.", icon="💾")
-        else:
-            st.info("Awaiting input. Please adjust the sliders and click calculate.")
+        # Similarity: Metrics have consistent typography and glow
+        metric_col1, metric_col2 = st.columns(2)
+        metric_col1.metric("Recommended Intensity", f"{intensity_res:.1f} %")
+        metric_col2.metric("Recommended Volume", f"{volume_res:.1f} Min")
+        
+        st.success(f"Inference completed dynamically! (Method: {defuzz_method.upper()})")
+        
+        # Dynamic Workout Generator based on Selected Muscle Groups
+        st.markdown("---")
+        st.markdown("### 🏃 Actionable Workout Protocol")
+        routine_desc, exercises_list, cardio_rec = generate_workout_routine_dynamic(intensity_res, volume_res, target_muscles, add_cardio)
+        st.write(f"**{routine_desc}**")
+        
+        df_exercises = pd.DataFrame(exercises_list)
+        st.table(df_exercises)
+        
+        if cardio_rec:
+            st.markdown("#### 🏃 Cardio Session Finisher")
+            st.table(pd.DataFrame([cardio_rec]))
+        
+        # Logging Feature
+        if st.button("💾 Save Recommendation to History Log", use_container_width=True):
+            log_entry = {
+                "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Sleep Quality": sleep_val,
+                "Muscle Soreness": soreness_val,
+                "Energy Level": energy_val,
+                "Stress Level": stress_val,
+                "Target Muscles": ", ".join([m.split(" ")[0] for m in target_muscles]),
+                "Cardio Included": "Yes" if add_cardio else "No",
+                "Defuzz Method": defuzz_method.upper(),
+                "Intensity (%)": round(intensity_res, 1),
+                "Volume (Min)": round(volume_res, 1)
+            }
+            st.session_state.workout_logs.append(log_entry)
+            st.toast("Workout logged successfully! Check the history dashboard at the bottom.", icon="💾")
 
-# Defuzzification Comparison Panel
-if calculate_btn:
-    st.divider()
+# Defuzzification Comparison Panel (Always visible, recomputes dynamically)
+st.divider()
+with st.container(border=True):
+    st.markdown("### 📊 Defuzzification Methods Comparison")
+    st.markdown("See how different mathematical techniques compute Workout Intensity and Workout Volume given your current physical inputs.")
+    
+    # Calculate results for all methods
+    methods = ["centroid", "bisector", "mom", "som", "lom"]
+    comp_results = []
+    for m in methods:
+        res = engine.evaluate(sleep_val, soreness_val, energy_val, stress_val, defuzz_method=m)
+        comp_results.append({
+            "Method": m.upper(),
+            "Intensity (%)": round(res['intensity'], 2),
+            "Volume (Min)": round(res['volume'], 2)
+        })
+        
+    comp_df = pd.DataFrame(comp_results)
+    
+    comp_col1, comp_col2 = st.columns([1, 1], gap="large")
+    
+    with comp_col1:
+        st.markdown("#### Comparison Table")
+        st.table(comp_df)
+        
+    with comp_col2:
+        st.markdown("#### Comparison Chart")
+        # Build bar chart using Plotly
+        fig_comp = go.Figure()
+        fig_comp.add_trace(go.Bar(
+            x=comp_df["Method"],
+            y=comp_df["Intensity (%)"],
+            name='Workout Intensity (%)',
+            marker_color='#00F0FF'
+        ))
+        fig_comp.add_trace(go.Bar(
+            x=comp_df["Method"],
+            y=comp_df["Volume (Min)"],
+            name='Workout Volume (Min)',
+            marker_color='#A855F7'
+        ))
+        fig_comp.update_layout(
+            barmode='group',
+            height=300,
+            margin=dict(l=20, r=20, t=10, b=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#E2E8F0'),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        st.plotly_chart(fig_comp, use_container_width=True)
+
+# Fuzzy Engine Graphs (Always visible, recomputes dynamically)
+st.divider()
+with st.expander("🔍 Show Fuzzy Logic Details (Fuzzification & Defuzzification Graphs)", expanded=True):
+    st.markdown("The black vertical line represents the Crisp (Defuzzified) value.")
+    
+    # Enclose graphs in a container
     with st.container(border=True):
-        st.markdown("### 📊 Defuzzification Methods Comparison")
-        st.markdown("See how different mathematical techniques compute Workout Intensity and Workout Volume given your current physical inputs.")
+        graph_col1, graph_col2 = st.columns(2)
         
-        # Calculate results for all methods
-        methods = ["centroid", "bisector", "mom", "som", "lom"]
-        comp_results = []
-        for m in methods:
-            res = engine.evaluate(sleep_val, soreness_val, energy_val, stress_val, defuzz_method=m)
-            comp_results.append({
-                "Method": m.upper(),
-                "Intensity (%)": round(res['intensity'], 2),
-                "Volume (Min)": round(res['volume'], 2)
-            })
+        with graph_col1:
+            st.markdown("#### Intensity Output")
+            fig_int, ax_int = plt.subplots(figsize=(8, 4))
+            try:
+                engine.intensity.view(sim=engine.fitness_sim)
+            except (KeyError, ValueError, Exception):
+                st.warning("Could not generate graph (No rule intersection).")
+            st.pyplot(plt.gcf())
+            plt.close(fig_int)
             
-        comp_df = pd.DataFrame(comp_results)
+        with graph_col2:
+            st.markdown("#### Volume Output")
+            fig_vol, ax_vol = plt.subplots(figsize=(8, 4))
+            try:
+                engine.volume.view(sim=engine.fitness_sim)
+            except (KeyError, ValueError, Exception):
+                pass
+            st.pyplot(plt.gcf())
+            plt.close(fig_vol)
+            
+        st.divider()
+        st.markdown("#### Input Variables (Fuzzification)")
+        inputs_col1, inputs_col2 = st.columns(2)
         
-        comp_col1, comp_col2 = st.columns([1, 1], gap="large")
-        
-        with comp_col1:
-            st.markdown("#### Comparison Table")
-            st.table(comp_df)
+        with inputs_col1:
+            fig1, ax1 = plt.subplots(figsize=(6, 3))
+            engine.sleep.view()
+            st.pyplot(plt.gcf())
+            plt.close(fig1)
             
-        with comp_col2:
-            st.markdown("#### Comparison Chart")
-            # Build bar chart using Plotly
-            fig_comp = go.Figure()
-            fig_comp.add_trace(go.Bar(
-                x=comp_df["Method"],
-                y=comp_df["Intensity (%)"],
-                name='Workout Intensity (%)',
-                marker_color='#00F0FF'
-            ))
-            fig_comp.add_trace(go.Bar(
-                x=comp_df["Method"],
-                y=comp_df["Volume (Min)"],
-                name='Workout Volume (Min)',
-                marker_color='#A855F7'
-            ))
-            fig_comp.update_layout(
-                barmode='group',
-                height=300,
-                margin=dict(l=20, r=20, t=10, b=20),
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='#E2E8F0'),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-            )
-            st.plotly_chart(fig_comp, use_container_width=True)
-
-if calculate_btn:
-    st.divider()
-    with st.expander("🔍 Show Fuzzy Logic Details (Fuzzification & Defuzzification Graphs)"):
-        st.markdown("The black vertical line represents the Crisp (Defuzzified) value.")
-        
-        # Enclose graphs in a container
-        with st.container(border=True):
-            graph_col1, graph_col2 = st.columns(2)
+            fig2, ax2 = plt.subplots(figsize=(6, 3))
+            engine.energy.view()
+            st.pyplot(plt.gcf())
+            plt.close(fig2)
             
-            with graph_col1:
-                st.markdown("#### Intensity Output")
-                fig_int, ax_int = plt.subplots(figsize=(8, 4))
-                try:
-                    engine.intensity.view(sim=engine.fitness_sim)
-                except (KeyError, ValueError, Exception):
-                    st.warning("Could not generate graph (No rule intersection).")
-                st.pyplot(plt.gcf())
-                plt.close(fig_int)
-                
-            with graph_col2:
-                st.markdown("#### Volume Output")
-                fig_vol, ax_vol = plt.subplots(figsize=(8, 4))
-                try:
-                    engine.volume.view(sim=engine.fitness_sim)
-                except (KeyError, ValueError, Exception):
-                    pass
-                st.pyplot(plt.gcf())
-                plt.close(fig_vol)
-                
-            st.divider()
-            st.markdown("#### Input Variables (Fuzzification)")
-            inputs_col1, inputs_col2 = st.columns(2)
+        with inputs_col2:
+            fig3, ax3 = plt.subplots(figsize=(6, 3))
+            engine.soreness.view()
+            st.pyplot(plt.gcf())
+            plt.close(fig3)
             
-            with inputs_col1:
-                fig1, ax1 = plt.subplots(figsize=(6, 3))
-                engine.sleep.view()
-                st.pyplot(plt.gcf())
-                plt.close(fig1)
-                
-                fig2, ax2 = plt.subplots(figsize=(6, 3))
-                engine.energy.view()
-                st.pyplot(plt.gcf())
-                plt.close(fig2)
-                
-            with inputs_col2:
-                fig3, ax3 = plt.subplots(figsize=(6, 3))
-                engine.soreness.view()
-                st.pyplot(plt.gcf())
-                plt.close(fig3)
-                
-                fig4, ax4 = plt.subplots(figsize=(6, 3))
-                engine.stress.view()
-                st.pyplot(plt.gcf())
-                plt.close(fig4)
+            fig4, ax4 = plt.subplots(figsize=(6, 3))
+            engine.stress.view()
+            st.pyplot(plt.gcf())
+            plt.close(fig4)
 
 st.divider()
 st.markdown("### 📈 Interactive 3D Control Surfaces")
