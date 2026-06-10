@@ -131,7 +131,92 @@ class FuzzyFitSystem:
             'volume': volume
         }
 
+    def evaluate_sugeno(self, sleep_val, soreness_val, energy_val, stress_val):
+        """Computes outputs using a Sugeno-style Fuzzy Inference System."""
+        # Fuzzification
+        s = {
+            'Poor': float(fuzz.interp_membership(self.sleep.universe, self.sleep['Poor'].mf, sleep_val)),
+            'Average': float(fuzz.interp_membership(self.sleep.universe, self.sleep['Average'].mf, sleep_val)),
+            'Good': float(fuzz.interp_membership(self.sleep.universe, self.sleep['Good'].mf, sleep_val))
+        }
+        so = {
+            'Low': float(fuzz.interp_membership(self.soreness.universe, self.soreness['Low'].mf, soreness_val)),
+            'Moderate': float(fuzz.interp_membership(self.soreness.universe, self.soreness['Moderate'].mf, soreness_val)),
+            'High': float(fuzz.interp_membership(self.soreness.universe, self.soreness['High'].mf, soreness_val))
+        }
+        e = {
+            'Deficit': float(fuzz.interp_membership(self.energy.universe, self.energy['Deficit'].mf, energy_val)),
+            'Balanced': float(fuzz.interp_membership(self.energy.universe, self.energy['Balanced'].mf, energy_val)),
+            'Surplus': float(fuzz.interp_membership(self.energy.universe, self.energy['Surplus'].mf, energy_val))
+        }
+        st_val = {
+            'Low': float(fuzz.interp_membership(self.stress.universe, self.stress['Low'].mf, stress_val)),
+            'Normal': float(fuzz.interp_membership(self.stress.universe, self.stress['Normal'].mf, stress_val)),
+            'High': float(fuzz.interp_membership(self.stress.universe, self.stress['High'].mf, stress_val))
+        }
+
+        # Singletons definition
+        # Intensity (%)
+        i_sing = {
+            'Very Light': 15.0,
+            'Light': 35.0,
+            'Moderate': 55.0,
+            'High': 75.0,
+            'Maximum': 95.0
+        }
+        # Volume (Min)
+        v_sing = {
+            'Low': 25.0,
+            'Medium': 65.0,
+            'High': 105.0
+        }
+
+        # Rule evaluation (Firing strengths and corresponding singleton outputs)
+        rules = [
+            (max(s['Poor'], so['High'], st_val['High']), i_sing['Very Light'], v_sing['Low']),
+            (min(e['Deficit'], so['High']), i_sing['Very Light'], v_sing['Low']),
+            (min(s['Good'], so['Low'], e['Surplus'], st_val['Low']), i_sing['Maximum'], v_sing['High']),
+            (min(s['Good'], so['Low'], e['Balanced'], st_val['Normal']), i_sing['High'], v_sing['High']),
+            (min(s['Average'], so['Moderate'], e['Balanced']), i_sing['Moderate'], v_sing['Medium']),
+            (min(s['Average'], so['Low'], st_val['Normal']), i_sing['Moderate'], v_sing['High']),
+            (min(s['Good'], so['Moderate'], e['Surplus']), i_sing['High'], v_sing['Medium']),
+            (min(s['Average'], so['Moderate'], e['Surplus']), i_sing['Moderate'], v_sing['Medium']),
+            (min(e['Deficit'], so['Low'], s['Good']), i_sing['Light'], v_sing['Medium']),
+            (min(e['Deficit'], so['Moderate']), i_sing['Very Light'], v_sing['Low']),
+            (min(st_val['High'], s['Average'], e['Balanced']), i_sing['Light'], v_sing['Medium']),
+            (min(st_val['Low'], s['Poor'], so['Low']), i_sing['Light'], v_sing['Low']),
+            (max(s['Average'], e['Balanced'], st_val['Normal']), i_sing['Moderate'], v_sing['Medium']),
+            (min(so['Low'], e['Surplus'], st_val['High']), i_sing['Moderate'], v_sing['Medium']),
+            (min(so['High'], s['Good'], e['Surplus']), i_sing['Light'], v_sing['Low']),
+            (min(s['Poor'], e['Balanced'], so['Moderate']), i_sing['Light'], v_sing['Low']),
+            (min(e['Deficit'], s['Average'], st_val['Normal']), i_sing['Light'], v_sing['Medium']),
+            (min(so['Moderate'], st_val['Low'], e['Balanced']), i_sing['Moderate'], v_sing['Medium'])
+        ]
+
+        # Calculate weighted average
+        sum_w = 0.0
+        sum_w_int = 0.0
+        sum_w_vol = 0.0
+
+        for w, int_val, vol_val in rules:
+            sum_w += w
+            sum_w_int += w * int_val
+            sum_w_vol += w * vol_val
+
+        if sum_w > 0:
+            intensity = sum_w_int / sum_w
+            volume = sum_w_vol / sum_w
+        else:
+            intensity = 50.0
+            volume = 60.0
+
+        return {
+            'intensity': intensity,
+            'volume': volume
+        }
+
     def get_membership_values(self, sleep_val, soreness_val, energy_val, stress_val):
+
         """Returns the membership value (degree of activation) for each linguistic category of each input variable."""
         return {
             'Sleep Quality': {

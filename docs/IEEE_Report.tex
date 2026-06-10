@@ -127,6 +127,19 @@ Under these symmetric active rule activation cases, the methods yield identical 
 \subsection{3D Control Surfaces}
 To analyze the non-linear decision boundaries of the system, 3D control surfaces were plotted. For example, by fixing Stress and Soreness at 5.0, a 3D surface shows how the interaction between Sleep Quality and Energy Level directly manipulates Workout Intensity. The gradient of the surface validates that higher sleep and energy yield an exponentially higher intensity recommendation without sudden discontinuous jumps.
 
+\subsection{Sugeno Inference Model Comparison}
+To demonstrate mathematical flexibility, the system was extended to support a Sugeno-style Fuzzy Inference System. Unlike the Mamdani model which maps rules to output fuzzy sets, the Sugeno model utilizes constant singletons for consequents. The singleton values represent fixed output levels:
+\begin{itemize}
+    \item \textbf{Workout Intensity (\%):} Very Light ($15$), Light ($35$), Moderate ($55$), High ($75$), Maximum ($95$).
+    \item \textbf{Workout Volume (Min):} Low ($25$), Medium ($65$), High ($105$).
+\end{itemize}
+The crisp output is calculated as a weighted average of the singleton outputs, where the weights correspond to the firing strengths ($w_k$) of the 18 rules:
+\begin{equation}
+z_{Sugeno} = \frac{\sum_{k=1}^{18} w_k \cdot z_k}{\sum_{k=1}^{18} w_k}
+\end{equation}
+Under the balanced user profile ($Sleep=7.0, Soreness=3.0, Energy=6.0, Stress=4.0$), the Sugeno system yields a recommended intensity of $55.0\%$ and a volume of $78.33$ minutes, compared to Mamdani's $60.0\%$ intensity and $79.85$ minutes. This comparison highlights how Sugeno provides a computationally efficient, deterministic alternative with simplified calculations while Mamdani captures more intuitive linguistic nuances in output sets.
+
+
 \section{Technology Stack and Web Application Implementation}
 While academic environments primarily utilize the MATLAB Fuzzy Logic Toolbox, this project was developed using \textbf{Python (\texttt{scikit-fuzzy})} combined with \textbf{Streamlit} and \textbf{Plotly}. This decision was driven by several practical software engineering advantages:
 

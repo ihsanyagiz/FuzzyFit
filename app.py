@@ -9,9 +9,17 @@ from fuzzy_engine import FuzzyFitSystem
 # Page Configuration
 st.set_page_config(page_title="FuzzyFit Assistant", page_icon="⚡", layout="wide")
 
-# Initialize Session State for Workout History
+# Initialize Session State for Workout History and Sliders
 if 'workout_logs' not in st.session_state:
     st.session_state.workout_logs = []
+if 'sleep_val' not in st.session_state:
+    st.session_state.sleep_val = 7.0
+if 'soreness_val' not in st.session_state:
+    st.session_state.soreness_val = 3.0
+if 'energy_val' not in st.session_state:
+    st.session_state.energy_val = 6.0
+if 'stress_val' not in st.session_state:
+    st.session_state.stress_val = 4.0
 
 # Localization Dictionary
 LANG_DICT = {
@@ -38,7 +46,7 @@ LANG_DICT = {
         "outputs_header": "🎯 Workout Recommendation (Outputs)",
         "intensity_res": "Recommended Intensity",
         "volume_res": "Recommended Volume",
-        "success_msg": "Inference completed dynamically! (Method: {method})",
+        "success_msg": "Inference completed dynamically! (Model: {model}, Method: {method})",
         "protocol_header": "🏃 Actionable Workout Protocol",
         "cardio_header": "🏃 Cardio Session Finisher",
         "cardio_activity": "Cardio Session (Run/Cycle/Row)",
@@ -46,7 +54,7 @@ LANG_DICT = {
         "cardio_intensity_high": "HIIT Intervals (~{intensity:.0f}% Max HR / RPE 9)",
         "save_log_btn": "💾 Save Recommendation to History Log",
         "save_success": "Workout logged successfully! Check the history dashboard at the bottom.",
-        "comp_header": "### 📊 Defuzzification Methods Comparison",
+        "comp_header": "### 📊 Defuzzification Methods Comparison (Mamdani Only)",
         "comp_desc": "See how different mathematical techniques compute Workout Intensity and Workout Volume given your current physical inputs.",
         "comp_table_title": "Comparison Table",
         "comp_chart_title": "Comparison Chart",
@@ -70,7 +78,8 @@ LANG_DICT = {
         "history_chart_title": "Performance Trend Chart",
         "exercise_cols": ["Muscle Group", "Exercise", "Sets", "Reps / Duration", "Target Load / RPE"],
         "cardio_cols": ["Activity", "Duration", "Intensity"],
-        "routine_title": "🏃 Workout Routine ({total_sets} Total Strength Sets)"
+        "routine_title": "🏃 Workout Routine ({total_sets} Total Strength Sets)",
+        "sugeno_msg": "Output membership graphs are specific to Mamdani inference. In Sugeno inference, outputs are calculated as weighted averages of constant singletons: Intensity (Very Light=15%, Light=35%, Moderate=55%, High=75%, Maximum=95%) and Volume (Low=25, Medium=65, High=105 Min)."
     },
     "TR": {
         "title": "⚡ FuzzyFit",
@@ -95,7 +104,7 @@ LANG_DICT = {
         "outputs_header": "🎯 Antrenman Tavsiyesi (Çıktılar)",
         "intensity_res": "Önerilen Yoğunluk",
         "volume_res": "Önerilen Süre",
-        "success_msg": "Bulanık çıkarım dinamik olarak hesaplandı! (Yöntem: {method})",
+        "success_msg": "Bulanık çıkarım dinamik olarak hesaplandı! (Model: {model}, Yöntem: {method})",
         "protocol_header": "🏃 Uygulanabilir Antrenman Programı",
         "cardio_header": "🏃 Kardiyo Bitirici Seansı",
         "cardio_activity": "Kardiyo Seansı (Koşu/Bisiklet/Kürek)",
@@ -103,7 +112,7 @@ LANG_DICT = {
         "cardio_intensity_high": "HIIT İnterval (~%{intensity:.0f} Maks Nabız / RPE 9)",
         "save_log_btn": "💾 Öneriyi Günlüğe Kaydet",
         "save_success": "Antrenman başarıyla kaydedildi! Sayfanın altındaki geçmiş panelini inceleyin.",
-        "comp_header": "### 📊 Durulaştırma Yöntemlerinin Karşılaştırması",
+        "comp_header": "### 📊 Durulaştırma Yöntemlerinin Karşılaştırması (Sadece Mamdani)",
         "comp_desc": "Farklı matematiksel durulaştırma tekniklerinin o anki girdilere göre Yoğunluk ve Süreyi nasıl hesapladığını görün.",
         "comp_table_title": "Karşılaştırma Tablosu",
         "comp_chart_title": "Karşılaştırma Grafiği",
@@ -127,11 +136,12 @@ LANG_DICT = {
         "history_chart_title": "Performans Trend Grafiği",
         "exercise_cols": ["Çalışılan Bölge", "Egzersiz", "Set Sayısı", "Tekrar / Süre", "Hedef Ağırlık / RPE"],
         "cardio_cols": ["Aktivite", "Süre", "Yoğunluk"],
-        "routine_title": "🏃 Antrenman Programı ({total_sets} Toplam Güç Seti)"
+        "routine_title": "🏃 Antrenman Programı ({total_sets} Toplam Güç Seti)",
+        "sugeno_msg": "Çıktı üyelik grafikleri Mamdani çıkarımına özeldir. Sugeno çıkarımında çıktılar, sabit tekil değerlerin (singletons) ağırlıklı ortalaması olarak hesaplanır: Yoğunluk (Çok Hafif=15, Hafif=35, Orta=55, Yüksek=75, Maksimum=95) ve Süre (Düşük=25, Orta=65, Yüksek=105 Dk)."
     }
 }
 
-# Custom CSS for Premium Look & Gestalt Principles (Proximity, Similarity, Figure/Ground)
+# Custom CSS
 st.markdown("""
 <style>
     /* Glow effect for metrics */
@@ -183,23 +193,58 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar for Settings (Language Selection First)
-st.sidebar.header("🌐 Language Settings / Dil Ayarları")
-lang = st.sidebar.selectbox("Select Language / Dil Seçin", ["EN", "TR"])
-t = LANG_DICT[lang]
+# Main Page Header with Split Columns for Top-Right Language Option
+header_left, header_right = st.columns([6, 1])
 
-# Main Title (Symmetry & Strong Figure)
-st.markdown(f'<h1 class="gradient-text">{t["title"]}</h1>', unsafe_allow_html=True)
-st.markdown(f'<p class="sub-text">{t["subtitle"]}</p>', unsafe_allow_html=True)
+with header_right:
+    # Small, clean selector placed at the top-right
+    lang = st.selectbox("Language / Dil Selection", ["EN", "TR"], label_visibility="collapsed")
+    t = LANG_DICT[lang]
 
-# Sidebar for Settings (Proximity: Keep settings away from main data flow)
+with header_left:
+    st.markdown(f'<h1 class="gradient-text" style="margin: 0; padding: 0;">{t["title"]}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<p class="sub-text" style="margin-top: -5px; margin-bottom: 20px;">{t["subtitle"]}</p>', unsafe_allow_html=True)
+
+# Sidebar for Preset Profiles
+st.sidebar.header("📋 Preset Profiles / Hazır Durumlar")
+preset_options = {
+    "Custom / Özel": "Custom",
+    "Rested / Dinlenmiş": "Rested",
+    "Exhausted / Çok Yorgun": "Exhausted",
+    "Post Leg-Day / Bacak Sonrası": "Post Leg-Day",
+    "High Stress / Yüksek Stres": "High Stress"
+}
+preset_select = st.sidebar.selectbox("Select Profile / Profil Seçin", list(preset_options.keys()))
+
+presets_data = {
+    "Custom": None,
+    "Rested": {"sleep": 9.0, "soreness": 1.0, "energy": 9.0, "stress": 2.0},
+    "Exhausted": {"sleep": 3.0, "soreness": 8.0, "energy": 2.0, "stress": 8.0},
+    "Post Leg-Day": {"sleep": 7.0, "soreness": 8.0, "energy": 6.0, "stress": 3.0},
+    "High Stress": {"sleep": 4.0, "soreness": 3.0, "energy": 4.0, "stress": 9.0}
+}
+selected_preset = preset_options[preset_select]
+
+if selected_preset != "Custom":
+    preset_vals = presets_data[selected_preset]
+    st.session_state.sleep_val = preset_vals["sleep"]
+    st.session_state.soreness_val = preset_vals["soreness"]
+    st.session_state.energy_val = preset_vals["energy"]
+    st.session_state.stress_val = preset_vals["stress"]
+
+# Sidebar for Inference Model (Mamdani vs Sugeno)
+st.sidebar.header("🔀 Inference Model / Çıkarım Modeli")
+model_type = st.sidebar.selectbox("Model Selection", ["Mamdani", "Sugeno"], 
+                                   help="Mamdani outputs are fuzzy sets. Sugeno outputs are weighted singletons.")
+
+# Sidebar for Defuzzification Settings
 st.sidebar.header(t["engine_settings"])
 st.sidebar.markdown(t["defuzz_help"])
 defuzz_method = st.sidebar.selectbox(t["defuzz_label"], 
                                      ["centroid", "bisector", "mom", "som", "lom"], 
                                      help="Centroid is the most common. Others use different mathematical area calculations.")
 
-# Initialize Fuzzy System (No caching to avoid stale states)
+# Initialize Fuzzy System
 def get_fuzzy_system():
     return FuzzyFitSystem()
 
@@ -221,24 +266,38 @@ with col1:
     with st.container(border=True):
         st.markdown(f"### {t['inputs_header']}")
         
-        sleep_val = st.slider(t["sleep_label"], min_value=0.0, max_value=10.0, value=7.0, step=0.1, 
-                               help=t["sleep_help"])
+        # Calculate dynamic dominant linguistic label *before* rendering slider
+        m_vals_temp = engine.get_membership_values(st.session_state.sleep_val, st.session_state.soreness_val, st.session_state.energy_val, st.session_state.stress_val)
         
-        soreness_val = st.slider(t["soreness_label"], min_value=0.0, max_value=10.0, value=3.0, step=0.1,
-                                 help=t["soreness_help"])
+        def get_dominant_label(var_key, lang):
+            terms = m_vals_temp[var_key]
+            dom_term = max(terms, key=terms.get)
+            dom_val = terms[dom_term]
+            
+            t_map = {
+                "EN": {"Poor": "Poor", "Average": "Average", "Good": "Good", "Low": "Low", "Moderate": "Moderate", "High": "High", "Deficit": "Deficit", "Balanced": "Balanced", "Surplus": "Surplus", "Normal": "Normal"},
+                "TR": {"Poor": "Kötü", "Average": "Ortalama", "Good": "İyi", "Low": "Düşük", "Moderate": "Orta", "High": "Yüksek", "Deficit": "Açık", "Balanced": "Dengeli", "Surplus": "Fazla", "Normal": "Normal"}
+            }
+            return f" [{t_map[lang][dom_term]} - {dom_val*100:.0f}%]" if dom_val > 0 else ""
+
+        # Sliders bound to session state
+        sleep_label_full = t["sleep_label"] + get_dominant_label("Sleep Quality", lang)
+        sleep_val = st.slider(sleep_label_full, min_value=0.0, max_value=10.0, key="sleep_val", help=t["sleep_help"])
+        
+        soreness_label_full = t["soreness_label"] + get_dominant_label("Muscle Soreness", lang)
+        soreness_val = st.slider(soreness_label_full, min_value=0.0, max_value=10.0, key="soreness_val", help=t["soreness_help"])
                                   
-        energy_val = st.slider(t["energy_label"], min_value=0.0, max_value=10.0, value=6.0, step=0.1,
-                               help=t["energy_help"])
+        energy_label_full = t["energy_label"] + get_dominant_label("Energy Level", lang)
+        energy_val = st.slider(energy_label_full, min_value=0.0, max_value=10.0, key="energy_val", help=t["energy_help"])
                                
-        stress_val = st.slider(t["stress_label"], min_value=0.0, max_value=10.0, value=4.0, step=0.1,
-                               help=t["stress_help"])
+        stress_label_full = t["stress_label"] + get_dominant_label("Stress Level", lang)
+        stress_val = st.slider(stress_label_full, min_value=0.0, max_value=10.0, key="stress_val", help=t["stress_help"])
         
         # Live Fuzzification Dashboard (Gestalt Law of Proximity)
         st.markdown(f"#### {t['live_fuzz']}")
         m_vals = engine.get_membership_values(sleep_val, soreness_val, energy_val, stress_val)
         
         for var_name, terms in m_vals.items():
-            # Translate input variable names
             translated_var = var_name
             if lang == "TR":
                 if var_name == "Sleep Quality": translated_var = "Uyku Kalitesi"
@@ -249,7 +308,6 @@ with col1:
             st.markdown(f"**{translated_var}**")
             cols = st.columns(3)
             
-            # Get term translations
             term_keys = list(terms.keys())
             for idx, term_name in enumerate(term_keys):
                 term_val = terms[term_name]
@@ -346,7 +404,6 @@ def generate_workout_routine_dynamic(intensity, volume, target_muscles, add_card
             rpe_desc = "Light (RPE 6)"
         
     # 3. Calculate Total Target Sets for Strength
-    # Assume 4 minutes per set (execution + 2-3 min rest)
     total_sets = max(3, int(strength_min / 4))
     
     # 4. Allocate Sets to Selected Muscles
@@ -359,11 +416,8 @@ def generate_workout_routine_dynamic(intensity, volume, target_muscles, add_card
     exercises = []
     
     for idx, muscle in enumerate(selected_muscles):
-        # Add remainder set to earlier muscles in selection
         muscle_sets_target = sets_per_muscle + (1 if idx < remainder else 0)
         
-        # Get exercise pool for this muscle in selected language
-        # We find match using the canonical key (which is present in EXERCISE_POOL)
         canonical_key = "Chest (Göğüs)"
         for k in EXERCISE_POOL.keys():
             if k.split(" ")[0].lower() in muscle.lower():
@@ -371,9 +425,6 @@ def generate_workout_routine_dynamic(intensity, volume, target_muscles, add_card
                 break
                 
         pool = EXERCISE_POOL[canonical_key][lang]
-        
-        # Distribute sets target across multiple exercises to avoid 1 exercise doing 10 sets
-        # We aim for ~3 to 4 sets per exercise
         num_exercises = max(1, int(np.ceil(muscle_sets_target / 4.0)))
         
         base_sets = muscle_sets_target // num_exercises
@@ -386,7 +437,6 @@ def generate_workout_routine_dynamic(intensity, volume, target_muscles, add_card
                 
             ex_name = pool[ex_idx % len(pool)]
             
-            # Special case for Plank (which is duration based, not reps)
             current_reps = reps_desc
             if "plank" in ex_name.lower():
                 current_reps = "30-60 sec hold" if lang == "EN" else "30-60 sn bekleme"
@@ -425,8 +475,12 @@ def generate_workout_routine_dynamic(intensity, volume, target_muscles, add_card
         
     return routine_title, exercises, cardio_recommendation
 
-# Dynamic Evaluation of Fuzzy Logic (Runs automatically on slider change)
-result = engine.evaluate(sleep_val, soreness_val, energy_val, stress_val, defuzz_method=defuzz_method)
+# Dynamic Evaluation based on selected Inference Model (Mamdani vs Sugeno)
+if model_type == "Sugeno":
+    result = engine.evaluate_sugeno(sleep_val, soreness_val, energy_val, stress_val)
+else:
+    result = engine.evaluate(sleep_val, soreness_val, energy_val, stress_val, defuzz_method=defuzz_method)
+
 intensity_res = result['intensity']
 volume_res = result['volume']
 
@@ -435,12 +489,11 @@ with col2:
     with st.container(border=True):
         st.markdown(f"### {t['outputs_header']}")
         
-        # Similarity: Metrics have consistent typography and glow
         metric_col1, metric_col2 = st.columns(2)
         metric_col1.metric(t["intensity_res"], f"{intensity_res:.1f} %")
         metric_col2.metric(t["volume_res"], f"{volume_res:.1f} Min")
         
-        st.success(t["success_msg"].format(method=defuzz_method.upper()))
+        st.success(t["success_msg"].format(model=model_type, method=defuzz_method.upper()))
         
         # Dynamic Workout Generator based on Selected Muscle Groups
         st.markdown("---")
@@ -449,7 +502,6 @@ with col2:
         st.write(f"**{routine_desc}**")
         
         df_exercises = pd.DataFrame(exercises_list)
-        # Rename columns to match current language
         df_exercises.columns = t["exercise_cols"]
         st.table(df_exercises)
         
@@ -469,93 +521,97 @@ with col2:
                 "Stress Level": stress_val,
                 "Target Muscles": ", ".join([m.split(" ")[0] if lang == "EN" else m.split(" ")[-1].strip("()") for m in target_muscles]),
                 "Cardio Included": "Yes" if add_cardio else "No",
-                "Defuzz Method": defuzz_method.upper(),
+                "Inference Model": model_type,
+                "Defuzz Method": defuzz_method.upper() if model_type == "Mamdani" else "WEIGHTED AVG",
                 "Intensity (%)": round(intensity_res, 1),
                 "Volume (Min)": round(volume_res, 1)
             }
             st.session_state.workout_logs.append(log_entry)
             st.toast(t["save_success"], icon="💾")
 
-# Defuzzification Comparison Panel (Always visible, recomputes dynamically)
-st.divider()
-with st.container(border=True):
-    st.markdown(t["comp_header"])
-    st.markdown(t["comp_desc"])
-    
-    # Calculate results for all methods
-    methods = ["centroid", "bisector", "mom", "som", "lom"]
-    comp_results = []
-    for m in methods:
-        res = engine.evaluate(sleep_val, soreness_val, energy_val, stress_val, defuzz_method=m)
-        comp_results.append({
-            "Method" if lang == "EN" else "Yöntem": m.upper(),
-            "Intensity (%)" if lang == "EN" else "Yoğunluk (%)": round(res['intensity'], 2),
-            "Volume (Min)" if lang == "EN" else "Süre (Dk)": round(res['volume'], 2)
-        })
+# Defuzzification Comparison Panel (Only visible for Mamdani)
+if model_type == "Mamdani":
+    st.divider()
+    with st.container(border=True):
+        st.markdown(t["comp_header"])
+        st.markdown(t["comp_desc"])
         
-    comp_df = pd.DataFrame(comp_results)
-    
-    comp_col1, comp_col2 = st.columns([1, 1], gap="large")
-    
-    with comp_col1:
-        st.markdown(f"#### {t['comp_table_title']}")
-        st.table(comp_df)
+        methods = ["centroid", "bisector", "mom", "som", "lom"]
+        comp_results = []
+        for m in methods:
+            res = engine.evaluate(sleep_val, soreness_val, energy_val, stress_val, defuzz_method=m)
+            comp_results.append({
+                "Method" if lang == "EN" else "Yöntem": m.upper(),
+                "Intensity (%)" if lang == "EN" else "Yoğunluk (%)": round(res['intensity'], 2),
+                "Volume (Min)" if lang == "EN" else "Süre (Dk)": round(res['volume'], 2)
+            })
+            
+        comp_df = pd.DataFrame(comp_results)
+        comp_col1, comp_col2 = st.columns([1, 1], gap="large")
         
-    with comp_col2:
-        st.markdown(f"#### {t['comp_chart_title']}")
-        # Build bar chart using Plotly
-        fig_comp = go.Figure()
-        fig_comp.add_trace(go.Bar(
-            x=comp_df["Method" if lang == "EN" else "Yöntem"],
-            y=comp_df["Intensity (%)" if lang == "EN" else "Yoğunluk (%)"],
-            name='Workout Intensity (%)' if lang == "EN" else 'Antrenman Yoğunluğu (%)',
-            marker_color='#00F0FF'
-        ))
-        fig_comp.add_trace(go.Bar(
-            x=comp_df["Method" if lang == "EN" else "Yöntem"],
-            y=comp_df["Volume (Min)" if lang == "EN" else "Süre (Dk)"],
-            name='Workout Volume (Min)' if lang == "EN" else 'Antrenman Süresi (Dk)',
-            marker_color='#A855F7'
-        ))
-        fig_comp.update_layout(
-            barmode='group',
-            height=300,
-            margin=dict(l=20, r=20, t=10, b=20),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#E2E8F0'),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-        )
-        st.plotly_chart(fig_comp, use_container_width=True)
+        with comp_col1:
+            st.markdown(f"#### {t['comp_table_title']}")
+            st.table(comp_df)
+            
+        with comp_col2:
+            st.markdown(f"#### {t['comp_chart_title']}")
+            fig_comp = go.Figure()
+            fig_comp.add_trace(go.Bar(
+                x=comp_df["Method" if lang == "EN" else "Yöntem"],
+                y=comp_df["Intensity (%)" if lang == "EN" else "Yoğunluk (%)"],
+                name='Workout Intensity (%)' if lang == "EN" else 'Antrenman Yoğunluğu (%)',
+                marker_color='#00F0FF'
+            ))
+            fig_comp.add_trace(go.Bar(
+                x=comp_df["Method" if lang == "EN" else "Yöntem"],
+                y=comp_df["Volume (Min)" if lang == "EN" else "Süre (Dk)"],
+                name='Workout Volume (Min)' if lang == "EN" else 'Antrenman Süresi (Dk)',
+                marker_color='#A855F7'
+            ))
+            fig_comp.update_layout(
+                barmode='group',
+                height=300,
+                margin=dict(l=20, r=20, t=10, b=20),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='#E2E8F0'),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+            st.plotly_chart(fig_comp, use_container_width=True)
 
 # Fuzzy Engine Graphs (Always visible, recomputes dynamically)
 st.divider()
 with st.expander(t["details_header"], expanded=True):
     st.markdown(t["details_desc"])
     
-    # Enclose graphs in a container
     with st.container(border=True):
         graph_col1, graph_col2 = st.columns(2)
         
         with graph_col1:
             st.markdown(t["int_out"])
-            fig_int, ax_int = plt.subplots(figsize=(8, 4))
-            try:
-                engine.intensity.view(sim=engine.fitness_sim)
-            except (KeyError, ValueError, Exception):
-                st.warning("Could not generate graph (No rule intersection).")
-            st.pyplot(plt.gcf())
-            plt.close(fig_int)
+            if model_type == "Mamdani":
+                fig_int, ax_int = plt.subplots(figsize=(8, 4))
+                try:
+                    engine.intensity.view(sim=engine.fitness_sim)
+                except (KeyError, ValueError, Exception):
+                    st.warning("Could not generate graph (No rule intersection).")
+                st.pyplot(plt.gcf())
+                plt.close(fig_int)
+            else:
+                st.info(t["sugeno_msg"])
             
         with graph_col2:
             st.markdown(t["vol_out"])
-            fig_vol, ax_vol = plt.subplots(figsize=(8, 4))
-            try:
-                engine.volume.view(sim=engine.fitness_sim)
-            except (KeyError, ValueError, Exception):
-                pass
-            st.pyplot(plt.gcf())
-            plt.close(fig_vol)
+            if model_type == "Mamdani":
+                fig_vol, ax_vol = plt.subplots(figsize=(8, 4))
+                try:
+                    engine.volume.view(sim=engine.fitness_sim)
+                except (KeyError, ValueError, Exception):
+                    pass
+                st.pyplot(plt.gcf())
+                plt.close(fig_vol)
+            else:
+                st.info(t["sugeno_msg"])
             
         st.divider()
         st.markdown(t["input_fuzz"])
@@ -604,11 +660,17 @@ with col_3d_1:
                 
                 for i in range(grid_size):
                     for j in range(grid_size):
-                        res = engine.evaluate(sleep_val=x_grid[i, j], 
-                                              soreness_val=soreness_val, 
-                                              energy_val=y_grid[i, j], 
-                                              stress_val=stress_val,
-                                              defuzz_method=defuzz_method)
+                        if model_type == "Sugeno":
+                            res = engine.evaluate_sugeno(sleep_val=x_grid[i, j], 
+                                                         soreness_val=soreness_val, 
+                                                         energy_val=y_grid[i, j], 
+                                                         stress_val=stress_val)
+                        else:
+                            res = engine.evaluate(sleep_val=x_grid[i, j], 
+                                                  soreness_val=soreness_val, 
+                                                  energy_val=y_grid[i, j], 
+                                                  stress_val=stress_val,
+                                                  defuzz_method=defuzz_method)
                         z_grid[i, j] = res['intensity']
                 
                 fig_3d_int = go.Figure(data=[go.Surface(z=z_grid, x=x_grid, y=y_grid, colorscale='Tealgrn')])
@@ -634,11 +696,17 @@ with col_3d_2:
                 
                 for i in range(grid_size):
                     for j in range(grid_size):
-                        res = engine.evaluate(sleep_val=x_grid[i, j], 
-                                              soreness_val=y_grid[i, j], 
-                                              energy_val=energy_val, 
-                                              stress_val=stress_val,
-                                              defuzz_method=defuzz_method)
+                        if model_type == "Sugeno":
+                            res = engine.evaluate_sugeno(sleep_val=x_grid[i, j], 
+                                                         soreness_val=y_grid[i, j], 
+                                                         energy_val=energy_val, 
+                                                         stress_val=stress_val)
+                        else:
+                            res = engine.evaluate(sleep_val=x_grid[i, j], 
+                                                  soreness_val=y_grid[i, j], 
+                                                  energy_val=energy_val, 
+                                                  stress_val=stress_val,
+                                                  defuzz_method=defuzz_method)
                         z_grid[i, j] = res['volume']
                 
                 fig_3d_vol = go.Figure(data=[go.Surface(z=z_grid, x=x_grid, y=y_grid, colorscale='Plotly3')])
@@ -660,7 +728,6 @@ with st.container(border=True):
     else:
         df_logs = pd.DataFrame(st.session_state.workout_logs)
         
-        # Translate dataframe column headers if TR
         if lang == "TR":
             df_logs_display = df_logs.rename(columns={
                 "Timestamp": "Zaman Damgası",
@@ -668,10 +735,11 @@ with st.container(border=True):
                 "Muscle Soreness": "Kas Ağrısı",
                 "Energy Level": "Enerji Seviyesi",
                 "Stress Level": "Stres Seviyesi",
-                "Target Muscles": "Çalışılan Bölgeler",
+                "Target Muscles": "Çalisilan Bölgeler",
                 "Cardio Included": "Kardiyo Eklendi",
-                "Defuzz Method": "Durulaştırma Yöntemi",
-                "Intensity (%)": "Yoğunluk (%)",
+                "Inference Model": "Cikarim Modeli",
+                "Defuzz Method": "Durulastirma Yöntemi",
+                "Intensity (%)": "Yogunluk (%)",
                 "Volume (Min)": "Süre (Dk)"
             })
         else:
@@ -696,7 +764,6 @@ with st.container(border=True):
         with history_col2:
             st.markdown(f"#### {t['history_chart_title']}")
             
-            # Line chart showing how Intensity and Volume recommended change over time
             fig_trend = go.Figure()
             
             fig_trend.add_trace(go.Scatter(
