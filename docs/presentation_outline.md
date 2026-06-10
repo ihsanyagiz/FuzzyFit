@@ -34,7 +34,7 @@ Bu belge, CENG 386 dersi için yapacağınız sunumun (Beamer LaTeX sunumu) slay
 
 ### Slide 8: Technology Stack & Web App Features (MATLAB vs Python)
 * **Visual:** Streamlit uygulamasının arayüzünden (Öneri Tablosu, Canlı Bulanıklaştırma ve Grafik Paneli) ekran görüntüleri.
-* **Speaker Notes:** "Ders kapsamında MATLAB görsel arayüzü yaygın kullanılsa da, ben gerçek dünyada çalışabilecek, bulut konuşlu bir web uygulaması tasarlamak istedim. Python (scikit-fuzzy) + Streamlit kullanarak; girdilerin üyelik derecelerini anlık gösteren Canlı Bulanıklaştırma Paneli, Plotly ile etkileşimli 3D yüzey grafikleri, hedeflere göre egzersiz listesi üreten Akıllı Antrenman Üreteci ve antrenman geçmişini kaydedip CSV formatında indirmeyi sağlayan bir performans takip paneli geliştirdim."
+* **Speaker Notes:** "Derste MATLAB yaygın kullanılsa da, ben projeyi gerçek dünyada çalışabilecek, bulut konuşlu bir web uygulaması tasarlamak istedim. Python (scikit-fuzzy) + Streamlit kullanarak; girdilerin üyelik derecelerini anlık gösteren Canlı Bulanıklaştırma Paneli, Plotly ile etkileşimli 3D yüzey grafikleri, hedeflere ve seçilen kas gruplarına göre egzersiz listesi üreten ve set sayılarını fuzzy çıktı hacmine (dakika) göre dinamik ayarlayan Akıllı Antrenman Üreteci ve antrenman geçmişini kaydedip CSV formatında indirmeyi sağlayan bir performans takip paneli geliştirdim."
 
 ### Slide 9: Live Demo & Q&A
 * **Visual:** "Live Demo" ve "Thank You! / Questions?" yazısı.

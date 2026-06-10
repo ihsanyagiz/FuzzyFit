@@ -104,7 +104,7 @@ with col1:
         stress_val = st.slider("🤯 Stress Level", min_value=0.0, max_value=10.0, value=4.0, step=0.1,
                                help="0: Very relaxed, 10: Highly stressed")
         
-        # New Feature: Live Fuzzification Dashboard (Gestalt Law of Proximity)
+        # Live Fuzzification Dashboard (Gestalt Law of Proximity)
         st.markdown("#### 🔍 Live Fuzzification (Bulanıklaştırma Dereceleri)")
         m_vals = engine.get_membership_values(sleep_val, soreness_val, energy_val, stress_val)
         
@@ -122,98 +122,227 @@ with col1:
                              "Hypertrophy (Kas Büyümesi)", 
                              "Endurance / Cardio (Dayanıklılık)", 
                              "Active Recovery (Aktif Yenilenme)"])
+        
+        # New Feature: Target Muscle Groups selection
+        target_muscles = st.multiselect("💪 Target Muscle Groups / Çalışılacak Bölgeler",
+                                        ["Chest (Göğüs)", "Back (Sırt)", "Shoulders (Omuz)", "Legs (Bacak)", "Biceps (Pazı)", "Triceps (Arka Kol)", "Core (Karın)"],
+                                        default=["Chest (Göğüs)", "Back (Sırt)", "Legs (Bacak)"])
                                
         calculate_btn = st.button("🚀 Calculate Optimal Workout", use_container_width=True)
 
-# Helper function to generate routine
-def generate_workout_routine(goal, intensity, volume):
+# Complete exercise database mapped by muscle group, workout goal, and output intensity level
+EXERCISE_DATABASE = {
+    "Chest (Göğüs)": {
+        "Strength": {
+            "high": {"Exercise": "Barbell Bench Press", "Reps/Duration": "4-5 reps", "Target Load / RPE": "80%+ 1RM / RPE 9"},
+            "mod": {"Exercise": "Dumbbell Bench Press", "Reps/Duration": "6-8 reps", "Target Load / RPE": "70-80% 1RM / RPE 8"},
+            "low": {"Exercise": "Push-ups (Controlled Tempo)", "Reps/Duration": "10-12 reps", "Target Load / RPE": "Bodyweight / RPE 6"}
+        },
+        "Hypertrophy": {
+            "high": {"Exercise": "Incline Dumbbell Press", "Reps/Duration": "8-10 reps", "Target Load / RPE": "RPE 9"},
+            "mod": {"Exercise": "Chest Press Machine", "Reps/Duration": "10-12 reps", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Pec Deck Flyes (Light)", "Reps/Duration": "12-15 reps", "Target Load / RPE": "RPE 6"}
+        },
+        "Endurance / Cardio": {
+            "high": {"Exercise": "Push-ups (AMRAP Intervals)", "Reps/Duration": "45 sec work / 30 sec rest", "Target Load / RPE": "Max Heart Rate"},
+            "mod": {"Exercise": "Dumbbell Flyes (High Rep)", "Reps/Duration": "15 reps", "Target Load / RPE": "RPE 7"},
+            "low": {"Exercise": "Kettlebell Halos", "Reps/Duration": "10 reps each side", "Target Load / RPE": "Light"}
+        },
+        "Active Recovery": {
+            "high": {"Exercise": "Push-ups on Knees (Slow)", "Reps/Duration": "8 reps", "Target Load / RPE": "RPE 4"},
+            "mod": {"Exercise": "Chest Wall Stretch", "Reps/Duration": "30 sec hold", "Target Load / RPE": "Gentle stretch"},
+            "low": {"Exercise": "Foam Roll Chest / Pecs", "Reps/Duration": "2 min", "Target Load / RPE": "Relaxation"}
+        }
+    },
+    "Back (Sırt)": {
+        "Strength": {
+            "high": {"Exercise": "Conventional Deadlift", "Reps/Duration": "3 reps", "Target Load / RPE": "85%+ 1RM / RPE 9"},
+            "mod": {"Exercise": "Barbell Row", "Reps/Duration": "6-8 reps", "Target Load / RPE": "75% 1RM / RPE 8"},
+            "low": {"Exercise": "Chest-Supported Dumbbell Row", "Reps/Duration": "10 reps", "Target Load / RPE": "Light / RPE 6"}
+        },
+        "Hypertrophy": {
+            "high": {"Exercise": "Weighted Pull-ups", "Reps/Duration": "6-8 reps", "Target Load / RPE": "RPE 9"},
+            "mod": {"Exercise": "Lat Pulldown (Wide Grip)", "Reps/Duration": "10-12 reps", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Seated Cable Row (Light)", "Reps/Duration": "12-15 reps", "Target Load / RPE": "RPE 6"}
+        },
+        "Endurance / Cardio": {
+            "high": {"Exercise": "Kettlebell Swings", "Reps/Duration": "1 min work / 30 sec rest", "Target Load / RPE": "High Intensity"},
+            "mod": {"Exercise": "Inverted Bodyweight Rows", "Reps/Duration": "12-15 reps", "Target Load / RPE": "RPE 7"},
+            "low": {"Exercise": "Resistance Band Lat Pulldowns", "Reps/Duration": "15-20 reps", "Target Load / RPE": "Light tension"}
+        },
+        "Active Recovery": {
+            "high": {"Exercise": "Cat-Cow Stretch", "Reps/Duration": "10 repetitions", "Target Load / RPE": "Gentle mobility"},
+            "mod": {"Exercise": "Prone Cobra (Lower Back)", "Reps/Duration": "20 sec holds", "Target Load / RPE": "Bodyweight"},
+            "low": {"Exercise": "Foam Roll Upper Back", "Reps/Duration": "3 min", "Target Load / RPE": "Relaxation"}
+        }
+    },
+    "Shoulders (Omuz)": {
+        "Strength": {
+            "high": {"Exercise": "Barbell Overhead Press (OHP)", "Reps/Duration": "4-5 reps", "Target Load / RPE": "80%+ 1RM / RPE 9"},
+            "mod": {"Exercise": "Standing Dumbbell Press", "Reps/Duration": "6-8 reps", "Target Load / RPE": "75% 1RM / RPE 8"},
+            "low": {"Exercise": "Dumbbell Arnold Press (Light)", "Reps/Duration": "10 reps", "Target Load / RPE": "RPE 6"}
+        },
+        "Hypertrophy": {
+            "high": {"Exercise": "Dumbbell Lateral Raise", "Reps/Duration": "12-15 reps", "Target Load / RPE": "RPE 9.5"},
+            "mod": {"Exercise": "Seated Dumbbell Shoulder Press", "Reps/Duration": "10-12 reps", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Face Pulls", "Reps/Duration": "15 reps", "Target Load / RPE": "RPE 7"}
+        },
+        "Endurance / Cardio": {
+            "high": {"Exercise": "Battle Ropes (Intervals)", "Reps/Duration": "30 sec work / 30 sec rest", "Target Load / RPE": "Max Effort"},
+            "mod": {"Exercise": "Dumbbell Front-to-Lateral Raises", "Reps/Duration": "12 reps", "Target Load / RPE": "Light / RPE 7"},
+            "low": {"Exercise": "Standing Band Pull-Aparts", "Reps/Duration": "20 reps", "Target Load / RPE": "High Reps"}
+        },
+        "Active Recovery": {
+            "high": {"Exercise": "Y-T-W Shoulder Raises", "Reps/Duration": "8 reps per letter", "Target Load / RPE": "No weight"},
+            "mod": {"Exercise": "Shoulder Dislocations (with band/broom)", "Reps/Duration": "10 reps", "Target Load / RPE": "Gentle mobility"},
+            "low": {"Exercise": "Child's Pose", "Reps/Duration": "45 sec hold", "Target Load / RPE": "Relaxation"}
+        }
+    },
+    "Legs (Bacak)": {
+        "Strength": {
+            "high": {"Exercise": "Barbell Back Squat", "Reps/Duration": "4-5 reps", "Target Load / RPE": "80%+ 1RM / RPE 9"},
+            "mod": {"Exercise": "Leg Press", "Reps/Duration": "6-8 reps", "Target Load / RPE": "75% 1RM / RPE 8"},
+            "low": {"Exercise": "Dumbbell Goblet Squat (Light)", "Reps/Duration": "10 reps", "Target Load / RPE": "RPE 6"}
+        },
+        "Hypertrophy": {
+            "high": {"Exercise": "Romanian Deadlift (RDL)", "Reps/Duration": "10 reps", "Target Load / RPE": "RPE 8.5"},
+            "mod": {"Exercise": "Bulgarian Split Squats", "Reps/Duration": "10 reps each side", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Leg Extensions", "Reps/Duration": "12-15 reps", "Target Load / RPE": "RPE 7"}
+        },
+        "Endurance / Cardio": {
+            "high": {"Exercise": "Jumping Squats (Intervals)", "Reps/Duration": "30 sec work / 30 sec rest", "Target Load / RPE": "Max Heart Rate"},
+            "mod": {"Exercise": "Dumbbell Walking Lunges", "Reps/Duration": "20 paces", "Target Load / RPE": "RPE 7"},
+            "low": {"Exercise": "Bodyweight Squats (Constant Tempo)", "Reps/Duration": "20 reps", "Target Load / RPE": "Zone 2"}
+        },
+        "Active Recovery": {
+            "high": {"Exercise": "Bodyweight Air Squats (Slow)", "Reps/Duration": "10 reps", "Target Load / RPE": "RPE 4"},
+            "mod": {"Exercise": "Couch Stretch (Quads/Hip Flexors)", "Reps/Duration": "30 sec each side", "Target Load / RPE": "Gentle stretch"},
+            "low": {"Exercise": "Foam Roll Quads and Hamstrings", "Reps/Duration": "3 min", "Target Load / RPE": "Relaxation"}
+        }
+    },
+    "Biceps (Pazı)": {
+        "Strength": {
+            "high": {"Exercise": "Barbell Bicep Curl", "Reps/Duration": "6 reps", "Target Load / RPE": "Heavy / RPE 8.5"},
+            "mod": {"Exercise": "Dumbbell Bicep Curl", "Reps/Duration": "8 reps", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Incline Dumbbell Curl (Light)", "Reps/Duration": "10 reps", "Target Load / RPE": "RPE 6"}
+        },
+        "Hypertrophy": {
+            "high": {"Exercise": "Incline Dumbbell Curl", "Reps/Duration": "10 reps", "Target Load / RPE": "RPE 9"},
+            "mod": {"Exercise": "Dumbbell Hammer Curl", "Reps/Duration": "12 reps", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Concentration Curls", "Reps/Duration": "12 reps", "Target Load / RPE": "RPE 7"}
+        },
+        "Endurance / Cardio": {
+            "high": {"Exercise": "Empty Barbell Curls (Max Reps)", "Reps/Duration": "1 min work", "Target Load / RPE": "Burnout"},
+            "mod": {"Exercise": "Cable Curls (High Rep)", "Reps/Duration": "15-20 reps", "Target Load / RPE": "RPE 7"},
+            "low": {"Exercise": "Resistance Band Bicep Curls", "Reps/Duration": "20 reps", "Target Load / RPE": "High rep pump"}
+        },
+        "Active Recovery": {
+            "high": {"Exercise": "Dumbbell Curls (Very Light)", "Reps/Duration": "12 reps", "Target Load / RPE": "RPE 4"},
+            "mod": {"Exercise": "Bicep Wall Stretch", "Reps/Duration": "20 sec holds", "Target Load / RPE": "Gentle stretch"},
+            "low": {"Exercise": "Light Forearm Rollout", "Reps/Duration": "1 min", "Target Load / RPE": "Mobility"}
+        }
+    },
+    "Triceps (Arka Kol)": {
+        "Strength": {
+            "high": {"Exercise": "Close Grip Bench Press", "Reps/Duration": "5 reps", "Target Load / RPE": "80% 1RM / RPE 9"},
+            "mod": {"Exercise": "Weighted Dips", "Reps/Duration": "6-8 reps", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Lying Tricep Extensions", "Reps/Duration": "10 reps", "Target Load / RPE": "Light / RPE 6"}
+        },
+        "Hypertrophy": {
+            "high": {"Exercise": "Overhead Cable Tricep Extension", "Reps/Duration": "10-12 reps", "Target Load / RPE": "RPE 9"},
+            "mod": {"Exercise": "Cable Tricep Pushdowns", "Reps/Duration": "12 reps", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Dumbbell Kickbacks", "Reps/Duration": "12-15 reps", "Target Load / RPE": "RPE 7"}
+        },
+        "Endurance / Cardio": {
+            "high": {"Exercise": "Bench Dips (Max Reps)", "Reps/Duration": "45 sec work", "Target Load / RPE": "Burnout"},
+            "mod": {"Exercise": "Cable Pushdowns (High Rep)", "Reps/Duration": "20 reps", "Target Load / RPE": "RPE 7"},
+            "low": {"Exercise": "Band Overhead Pushdowns", "Reps/Duration": "25 reps", "Target Load / RPE": "High rep pump"}
+        },
+        "Active Recovery": {
+            "high": {"Exercise": "Tricep Overhead Stretch", "Reps/Duration": "30 sec each side", "Target Load / RPE": "Gentle stretch"},
+            "mod": {"Exercise": "Wall Push-ups (Triceps focus)", "Reps/Duration": "10 reps", "Target Load / RPE": "Very light"},
+            "low": {"Exercise": "Light Elbow Mobility Extensions", "Reps/Duration": "2 min", "Target Load / RPE": "No weight"}
+        }
+    },
+    "Core (Karın)": {
+        "Strength": {
+            "high": {"Exercise": "Weighted Hanging Leg Raises", "Reps/Duration": "8 reps", "Target Load / RPE": "RPE 9"},
+            "mod": {"Exercise": "Ab Wheel Rollouts", "Reps/Duration": "8-10 reps", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Decline Bench Crunches", "Reps/Duration": "12 reps", "Target Load / RPE": "Bodyweight"}
+        },
+        "Hypertrophy": {
+            "high": {"Exercise": "Hanging Leg Raises", "Reps/Duration": "10-12 reps", "Target Load / RPE": "RPE 9"},
+            "mod": {"Exercise": "Cable Woodchoppers", "Reps/Duration": "12 reps each side", "Target Load / RPE": "RPE 8"},
+            "low": {"Exercise": "Plank (Squeeze focus)", "Reps/Duration": "45 sec", "Target Load / RPE": "Bodyweight"}
+        },
+        "Endurance / Cardio": {
+            "high": {"Exercise": "Mountain Climbers (Fast)", "Reps/Duration": "1 min work", "Target Load / RPE": "High Heart Rate"},
+            "mod": {"Exercise": "Russian Twists (High Rep)", "Reps/Duration": "20 reps each side", "Target Load / RPE": "RPE 7"},
+            "low": {"Exercise": "Plank (Steady State)", "Reps/Duration": "60 sec", "Target Load / RPE": "Zone 2"}
+        },
+        "Active Recovery": {
+            "high": {"Exercise": "Bird-Dog Pose", "Reps/Duration": "10 reps each side", "Target Load / RPE": "Bodyweight / Core stability"},
+            "mod": {"Exercise": "Dead Bug Pose", "Reps/Duration": "10 reps each side", "Target Load / RPE": "Bodyweight / Core stability"},
+            "low": {"Exercise": "Cobra Stretch (Abs focus)", "Reps/Duration": "30 sec hold", "Target Load / RPE": "Gentle stretch"}
+        }
+    }
+}
+
+# Helper function to generate workout routine
+def generate_workout_routine_dynamic(goal, intensity, volume, target_muscles):
     intensity = float(intensity)
     volume = float(volume)
     
-    if "Strength" in goal:
-        if intensity >= 80:
-            desc = "🔥 High Intensity Strength Protocol (Focus: Maximum Force Production)"
-            exercises = [
-                {"Exercise": "Barbell Back Squat", "Sets": "4", "Reps/Duration": "4-5 reps", "Target Load / RPE": f"~{intensity:.1f}% 1RM / RPE 9"},
-                {"Exercise": "Barbell Bench Press", "Sets": "4", "Reps/Duration": "4-5 reps", "Target Load / RPE": f"~{intensity:.1f}% 1RM / RPE 9"},
-                {"Exercise": "Conventional Deadlift", "Sets": "3", "Reps/Duration": "3 reps", "Target Load / RPE": f"~{intensity:.1f}% 1RM / RPE 9"},
-                {"Exercise": "Weighted Pull-ups", "Sets": "3", "Reps/Duration": "5 reps", "Target Load / RPE": "RPE 8.5"}
-            ]
-        elif intensity >= 60:
-            desc = "⚡ Moderate Intensity Strength Protocol (Focus: Technical Consistency & Power)"
-            exercises = [
-                {"Exercise": "Barbell Back Squat", "Sets": "3", "Reps/Duration": "6-8 reps", "Target Load / RPE": f"~{intensity:.1f}% 1RM / RPE 8"},
-                {"Exercise": "Overhead Press (OHP)", "Sets": "3", "Reps/Duration": "6-8 reps", "Target Load / RPE": f"~{intensity:.1f}% 1RM / RPE 8"},
-                {"Exercise": "Pendlay Rows", "Sets": "3", "Reps/Duration": "8 reps", "Target Load / RPE": "RPE 8"},
-                {"Exercise": "Hanging Leg Raises", "Sets": "3", "Reps/Duration": "10-12 reps", "Target Load / RPE": "Bodyweight"}
-            ]
-        else:
-            desc = "🌱 Deload Strength Protocol (Focus: Joint Recovery & Movement Mechanics)"
-            exercises = [
-                {"Exercise": "Goblet Squats", "Sets": "2", "Reps/Duration": "10 reps", "Target Load / RPE": "Light Load / RPE 6"},
-                {"Exercise": "Dumbbell Bench Press", "Sets": "2", "Reps/Duration": "10 reps", "Target Load / RPE": "Light Load / RPE 6"},
-                {"Exercise": "Face Pulls", "Sets": "3", "Reps/Duration": "15 reps", "Target Load / RPE": "Low Tension / RPE 6"},
-                {"Exercise": "Plank", "Sets": "3", "Reps/Duration": "45-60 sec", "Target Load / RPE": "Bodyweight"}
-            ]
-    elif "Hypertrophy" in goal:
-        if intensity >= 75:
-            desc = "💪 High Volume Muscle Growth Protocol (Focus: Mechanical Tension)"
-            exercises = [
-                {"Exercise": "Incline Dumbbell Press", "Sets": "4", "Reps/Duration": "8-10 reps", "Target Load / RPE": f"RPE 9 (Approx {intensity:.0f}% 1RM)"},
-                {"Exercise": "Romanian Deadlift (RDL)", "Sets": "3", "Reps/Duration": "10 reps", "Target Load / RPE": "RPE 8.5"},
-                {"Exercise": "Lat Pulldown (Wide Grip)", "Sets": "4", "Reps/Duration": "10-12 reps", "Target Load / RPE": "RPE 9"},
-                {"Exercise": "Dumbbell Lateral Raise", "Sets": "3", "Reps/Duration": "12-15 reps", "Target Load / RPE": "RPE 9 (Drop-set on last set)"}
-            ]
-        elif intensity >= 50:
-            desc = "🏋️ Standard Hypertrophy Protocol (Focus: Metabolic Stress)"
-            exercises = [
-                {"Exercise": "Dumbbell Bench Press", "Sets": "3", "Reps/Duration": "10-12 reps", "Target Load / RPE": f"RPE 8 (Approx {intensity:.0f}% 1RM)"},
-                {"Exercise": "Leg Press", "Sets": "3", "Reps/Duration": "12 reps", "Target Load / RPE": "RPE 8"},
-                {"Exercise": "Seated Cable Row", "Sets": "3", "Reps/Duration": "12 reps", "Target Load / RPE": "RPE 8"},
-                {"Exercise": "Incline Bicep Curls", "Sets": "3", "Reps/Duration": "12 reps", "Target Load / RPE": "RPE 8"}
-            ]
-        else:
-            desc = "🛌 Active Deload Hypertrophy Protocol (Focus: Recovery & Joint Flushing)"
-            exercises = [
-                {"Exercise": "Chest Press Machine", "Sets": "2", "Reps/Duration": "12-15 reps", "Target Load / RPE": "Low Load / RPE 6"},
-                {"Exercise": "Lat Pulldown Machine", "Sets": "2", "Reps/Duration": "12-15 reps", "Target Load / RPE": "Low Load / RPE 6"},
-                {"Exercise": "Leg Extensions", "Sets": "2", "Reps/Duration": "15 reps", "Target Load / RPE": "Low Load / RPE 6"},
-                {"Exercise": "Lying Leg Curls", "Sets": "2", "Reps/Duration": "15 reps", "Target Load / RPE": "Low Load / RPE 6"}
-            ]
-    elif "Endurance" in goal:
-        if intensity >= 80:
-            desc = "🏃 Anaerobic Capacity Protocol (Focus: VO2 Max & Lactate Threshold)"
-            exercises = [
-                {"Exercise": "Warm-up Jog", "Sets": "1", "Reps/Duration": "10 min", "Target Load / RPE": "RPE 4-5"},
-                {"Exercise": "High-Intensity Interval Sprinting", "Sets": "8-10", "Reps/Duration": "30 sec work / 30 sec rest", "Target Load / RPE": f"~{intensity:.0f}% Max HR / RPE 9.5"},
-                {"Exercise": "Rowing Machine Tempo Interval", "Sets": "3", "Reps/Duration": "3 min work / 2 min rest", "Target Load / RPE": "RPE 8.5"},
-                {"Exercise": "Cool-down Walk", "Sets": "1", "Reps/Duration": "5 min", "Target Load / RPE": "RPE 3"}
-            ]
-        elif intensity >= 60:
-            desc = "🚴 Aerobic Base Protocol (Focus: Cardiovascular Endurance)"
-            exercises = [
-                {"Exercise": "Dynamic Warm-up", "Sets": "1", "Reps/Duration": "5 min", "Target Load / RPE": "Low Intensity"},
-                {"Exercise": "Steady State Running/Cycling", "Sets": "1", "Reps/Duration": f"{volume - 15:.0f} min", "Target Load / RPE": f"Zone 2/3 ({intensity:.0f}% Max HR) / RPE 7"},
-                {"Exercise": "Elliptical Machine", "Sets": "1", "Reps/Duration": "10 min", "Target Load / RPE": "RPE 6.5"},
-                {"Exercise": "Stretching Flow", "Sets": "1", "Reps/Duration": "5 min", "Target Load / RPE": "Relaxation"}
-            ]
-        else:
-            desc = "🚶 Active Recovery Endurance Protocol (Focus: Aerobic Regeneration)"
-            exercises = [
-                {"Exercise": "Low-Intensity Steady State Walk (LISS)", "Sets": "1", "Reps/Duration": f"{volume - 10:.0f} min", "Target Load / RPE": "RPE 4-5 / Zone 1"},
-                {"Exercise": "Recumbent Cycling", "Sets": "1", "Reps/Duration": "10 min", "Target Load / RPE": "Very light resistance"},
-                {"Exercise": "Full Body Mobility & Foam Roll", "Sets": "1", "Reps/Duration": "10 min", "Target Load / RPE": "Low strain"}
-            ]
+    # 1. Determine Level based on intensity
+    if intensity >= 75:
+        level = "high"
+    elif intensity >= 50:
+        level = "mod"
     else:
-        desc = "🧘 Full-Body Restorative Protocol (Focus: Parasympathetic Activation & Mobility)"
-        exercises = [
-            {"Exercise": "Self-Myofascial Release (Foam Rolling)", "Sets": "1", "Reps/Duration": "10 min", "Target Load / RPE": "Tight areas focus"},
-            {"Exercise": "Dynamic Mobility Flow (Yoga-inspired)", "Sets": "1", "Reps/Duration": "15 min", "Target Load / RPE": "Deep breathing focus"},
-            {"Exercise": "Low-Intensity Walking or Cycling", "Sets": "1", "Reps/Duration": f"{max(10.0, volume - 35.0):.0f} min", "Target Load / RPE": f"~{intensity:.0f}% Max HR / RPE 3-4"},
-            {"Exercise": "Static Stretching (Hamstrings, Hip Flexors, Pecs)", "Sets": "1", "Reps/Duration": "10 min", "Target Load / RPE": "Mild discomfort threshold"}
-        ]
+        level = "low"
         
-    return desc, exercises
+    # 2. Determine Primary Goal string matching database keys
+    goal_key = "Strength"
+    if "Hypertrophy" in goal:
+        goal_key = "Hypertrophy"
+    elif "Endurance" in goal:
+        goal_key = "Endurance / Cardio"
+    elif "Active Recovery" in goal:
+        goal_key = "Active Recovery"
+        
+    # 3. Determine Dynamic Set Count based on fuzzy volume recommendation
+    # Connects fuzzy volume directly to physical sets count
+    if volume >= 80:
+        sets_val = "4"
+    elif volume >= 40:
+        sets_val = "3"
+    else:
+        sets_val = "2"
+        
+    # 4. Generate routine title
+    routine_title = f"🏃 Adaptive Workout Routine ({goal_key} - {level.upper()} intensity, {sets_val} sets per exercise)"
+    
+    # 5. Extract exercises from database for selected muscle groups
+    exercises = []
+    
+    # Fallback to Chest, Back, Legs if no muscle selected
+    selected_muscles = target_muscles if target_muscles else ["Chest (Göğüs)", "Back (Sırt)", "Legs (Bacak)"]
+    
+    for muscle in selected_muscles:
+        if muscle in EXERCISE_DATABASE:
+            ex_data = EXERCISE_DATABASE[muscle][goal_key][level].copy()
+            # Inject dynamic sets matching fuzzy volume
+            ex_data["Sets"] = sets_val
+            # Reorder columns for display
+            exercises.append({
+                "Muscle Group": muscle.split(" ")[0],
+                "Exercise": ex_data["Exercise"],
+                "Sets": ex_data["Sets"],
+                "Reps / Duration": ex_data["Reps/Duration"],
+                "Target Load / RPE": ex_data["Target Load / RPE"]
+            })
+            
+    return routine_title, exercises
 
 with col2:
     # Common Region: Grouping outputs inside a bounded container
@@ -233,10 +362,10 @@ with col2:
                 
                 st.success(f"Inference completed successfully! (Method: {defuzz_method.upper()})")
                 
-                # Dynamic Workout Generator
+                # Dynamic Workout Generator based on Selected Muscle Groups
                 st.markdown("---")
                 st.markdown("### 🏃 Actionable Workout Protocol")
-                routine_desc, exercises_list = generate_workout_routine(goal, intensity_res, volume_res)
+                routine_desc, exercises_list = generate_workout_routine_dynamic(goal, intensity_res, volume_res, target_muscles)
                 st.write(f"**{routine_desc}**")
                 
                 df_exercises = pd.DataFrame(exercises_list)
@@ -251,6 +380,7 @@ with col2:
                         "Energy Level": energy_val,
                         "Stress Level": stress_val,
                         "Workout Goal": goal,
+                        "Target Muscles": ", ".join([m.split(" ")[0] for m in target_muscles]),
                         "Defuzz Method": defuzz_method.upper(),
                         "Intensity (%)": round(intensity_res, 1),
                         "Volume (Min)": round(volume_res, 1)
@@ -260,7 +390,7 @@ with col2:
         else:
             st.info("Awaiting input. Please adjust the sliders and click calculate.")
 
-# Defuzzification Comparison Panel (New Feature)
+# Defuzzification Comparison Panel
 if calculate_btn:
     st.divider()
     with st.container(border=True):
@@ -438,7 +568,7 @@ with col_3d_2:
                                          margin=dict(l=0, r=0, b=0, t=30), height=500)
                 st.plotly_chart(fig_3d_vol, use_container_width=True)
 
-# Historical Analytics Dashboard (New Tab/Container at the bottom)
+# Historical Analytics Dashboard
 st.divider()
 with st.container(border=True):
     st.markdown("### 📅 Workout History & Analytics Dashboard")
