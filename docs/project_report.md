@@ -62,6 +62,16 @@ To evaluate their performance, a comparative test was conducted on two represent
 
 *Mathematical Explanation:* Under symmetric active rule activation cases, the methods yield identical results due to the symmetrical nature of the activated output membership functions. This mathematical consistency validates the rule base structure.
 
+#### Sugeno Inference Model Comparison
+To demonstrate mathematical flexibility, the system was extended to support a Sugeno-style Fuzzy Inference System. Unlike the Mamdani model which maps rules to output fuzzy sets, the Sugeno model utilizes constant singletons for consequents. The singleton values represent fixed output levels:
+- **Workout Intensity (%):** Very Light ($15$), Light ($35$), Moderate ($55$), High ($75$), Maximum ($95$)
+- **Workout Volume (Min):** Low ($25$), Medium ($65$), High ($105$)
+
+The crisp output is calculated as a weighted average of the singleton outputs, where the weights correspond to the firing strengths ($w_k$) of the 18 rules:
+$$z_{Sugeno} = \frac{\sum w_k z_k}{\sum w_k}$$
+
+Under the balanced user profile ($Sleep=7.0, Soreness=3.0, Energy=6.0, Stress=4.0$), the Sugeno system yields a recommended intensity of $55.0\%$ and a volume of $78.33$ minutes, compared to Mamdani's $60.0\%$ intensity and $79.85$ minutes. This comparison highlights how Sugeno provides a computationally efficient, deterministic alternative with simplified calculations while Mamdani captures more intuitive linguistic nuances in output sets.
+
 ### 5. Technology Stack Justification (Python vs. MATLAB)
 While MATLAB provides a visual Fuzzy Logic Toolbox, **Python (`scikit-fuzzy`) combined with `Streamlit` and `Plotly`** was chosen for this project for several critical software engineering and practical reasons:
 
