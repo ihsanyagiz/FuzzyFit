@@ -165,51 +165,140 @@ LANG_DICT = {
 # Custom CSS
 st.markdown("""
 <style>
-    /* Glow effect for metrics */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
+
+    /* Global Font Override */
+    html, body, [class*="css"], .stApp {
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    }
+
+    /* Sidebar Custom Styling */
+    section[data-testid="stSidebar"] {
+        background-color: #0A0D14 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Premium Card Containers (Glassmorphism & Neon Borders) */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        border: 1px solid rgba(0, 240, 255, 0.1) !important;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(30, 41, 59, 0.35) 100%) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.4) !important;
+        backdrop-filter: blur(8px) !important;
+        padding: 24px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+        border-color: rgba(0, 240, 255, 0.25) !important;
+        box-shadow: 0 15px 40px 0 rgba(0, 240, 255, 0.08) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Unified Metrics Card Styling */
+    div[data-testid="stMetric"] {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        padding: 20px !important;
+        border-radius: 14px !important;
+        text-align: center;
+        box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.01);
+    }
+
+    div[data-testid="stMetricLabel"] {
+        color: #94A3B8 !important;
+        font-size: 0.85rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1.5px !important;
+        font-weight: 600 !important;
+    }
+
     div[data-testid="stMetricValue"] {
         color: #00F0FF !important;
-        text-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+        text-shadow: 0 0 20px rgba(0, 240, 255, 0.45);
         font-weight: 800;
-        font-size: 3rem !important;
+        font-size: 2.8rem !important;
+        margin-top: 5px !important;
     }
-    
-    /* Calculate Button Styling */
+
+    /* Glowing Progress Bars for Live Fuzzification */
+    div[data-testid="stProgress"] > div > div > div > div {
+        background-color: #00F0FF !important;
+        box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+    }
+
+    /* Premium Table Styling */
+    .stTable table {
+        border-collapse: collapse;
+        width: 100%;
+        background-color: rgba(15, 23, 42, 0.2) !important;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .stTable th {
+        background-color: rgba(0, 240, 255, 0.08) !important;
+        color: #00F0FF !important;
+        font-weight: 700 !important;
+        text-align: left;
+        padding: 14px 16px !important;
+        border-bottom: 2px solid rgba(0, 240, 255, 0.15) !important;
+        font-size: 0.9rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stTable td {
+        padding: 14px 16px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+        color: #E2E8F0 !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* Premium Button Styling */
     div.stButton > button {
         background: linear-gradient(90deg, #00F0FF 0%, #0080FF 100%);
-        color: #000 !important;
-        font-weight: 900;
-        border-radius: 10px;
+        color: #0B0F19 !important;
+        font-weight: 800;
+        border-radius: 12px;
         border: none;
-        box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
-        transition: all 0.3s ease;
+        padding: 10px 24px;
+        box-shadow: 0 4px 15px rgba(0, 240, 255, 0.25);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         margin-top: 10px;
+        letter-spacing: 0.5px;
     }
-    
+
     div.stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+        box-shadow: 0 8px 25px rgba(0, 240, 255, 0.45);
+        color: #0B0F19 !important;
     }
-    
-    /* Header Gradient Text */
+
+    /* Title Header Gradient Styling */
     .gradient-text {
         background: linear-gradient(90deg, #00F0FF, #A855F7);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 3.5rem;
-        font-weight: 900;
+        font-size: 3.6rem;
+        font-weight: 800;
         margin-bottom: 0px;
+        letter-spacing: -1px;
     }
-    
+
     .sub-text {
         color: #94A3B8;
-        font-size: 1.2rem;
+        font-size: 1.15rem;
         margin-bottom: 2rem;
+        font-weight: 400;
     }
-    
-    /* Section Headers */
+
+    /* Section Header Custom Color */
     h3 {
-        color: #E2E8F0 !important;
-        font-weight: 600 !important;
+        color: #F8FAFC !important;
+        font-weight: 700 !important;
+        margin-bottom: 15px !important;
     }
 </style>
 """, unsafe_allow_html=True)
