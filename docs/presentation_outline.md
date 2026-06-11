@@ -32,10 +32,14 @@ Bu belge, CENG 386 dersi için yapacağınız sunumun (Beamer LaTeX sunumu) slay
 * **Visual:** Farklı fiziksel profillerde (Profile 1: Yorgun, Profile 2: Dengeli) durulaştırma yöntemlerinin ürettiği sonuçları karşılaştıran tablo.
 * **Speaker Notes:** "Sistemimizde farklı durulaştırma yöntemlerini test ettik. Girdi değerlerinin durumuna göre yöntemler benzer çıktılar verebilir. Simetrik üyelik fonksiyonlarının aktif olduğu dengeli durumlarda Centroid, Bisector ve MOM'un aynı sonuçları vermesi, sistemimizin kararlı ve tutarlı çalıştığının matematiksel kanıtıdır."
 
-### Slide 8: Technology Stack & Web App Features (MATLAB vs Python)
-* **Visual:** Streamlit uygulamasının arayüzünden (Öneri Tablosu, Canlı Bulanıklaştırma ve Grafik Paneli) ekran görüntüleri.
-* **Speaker Notes:** "Derste MATLAB yaygın kullanılsa da, ben projeyi gerçek dünyada çalışabilecek, bulut konuşlu bir web uygulaması tasarlamak istedim. Python (scikit-fuzzy) + Streamlit kullanarak; girdilerin üyelik derecelerini anlık gösteren Canlı Bulanıklaştırma Paneli, Plotly ile etkileşimli 3D yüzey grafikleri, seçilen kas gruplarına göre egzersiz listesi üreten, set sayılarını antrenman süresine göre hesaplayarak antrenman yoğunluğunu dolduran ve opsiyonel kardiyo seansı ekleyen Akıllı Antrenman Üreteci ve antrenman geçmişini kaydedip CSV formatında indirmeyi sağlayan bir performans takip paneli geliştirdim."
+### Slide 8: Sugeno Inference Model (Alternative FIS)
+* **Visual:** Sugeno modelinin matematiksel formülü ($z_{Sugeno}$) ve kullanılan tekil değerler (singleton outputs: Intensity [15, 35, 55, 75, 95] ve Volume [25, 65, 105]).
+* **Speaker Notes:** "Projemizde matematiksel çeşitliliği ve esnekliği göstermek amacıyla, Mamdani modelinin yanı sıra Sugeno çıkarım sistemini de modelledik. Sugeno modelinde, çıktı kümeleri yerine sabit tekil değerler (singletons) kullanıyoruz. Karar verme aşamasında kuralların ateşlenme güçlerini bu tekil değerlerin ağırlıklı ortalamasıyla birleştirerek net çıktı elde ediyoruz. Yaptığımız karşılaştırmada, dengeli bir sporcu profili için Sugeno modelimiz %55 yoğunluk ve 78 dakika süre önerirken, Mamdani modelimiz %60 yoğunluk ve 80 dakika süre önererek birbirine oldukça yakın ve kararlı sonuçlar verdi."
 
-### Slide 9: Live Demo & Q&A
+### Slide 9: Technology Stack & Web App Features (MATLAB vs Python)
+* **Visual:** Streamlit uygulamasının arayüzünden (Hazır Profiller, Öneri Tablosu, Canlı Bulanıklaştırma ve Grafik Paneli) ekran görüntüleri.
+* **Speaker Notes:** "Derste MATLAB yaygın kullanılsa da, ben projeyi gerçek dünyada çalışabilecek, bulut konuşlu bir web uygulaması tasarlamak istedim. Python (scikit-fuzzy) + Streamlit kullanarak; test senaryolarını anında yüklemeyi sağlayan Hazır Profiller, girdilerin üyelik derecelerini anlık gösteren Canlı Bulanıklaştırma Paneli, Plotly ile etkileşimli 3D yüzey grafikleri, seçilen kas gruplarına göre egzersiz listesi üreten, set sayılarını antrenman süresine göre hesaplayarak antrenman yoğunluğunu dolduran ve opsiyonel kardiyo seansı ekleyen Akıllı Antrenman Üreteci ve antrenman geçmişini kaydedip CSV formatında indirmeyi sağlayan bir performans takip paneli geliştirdim."
+
+### Slide 10: Live Demo & Q&A
 * **Visual:** "Live Demo" ve "Thank You! / Questions?" yazısı.
 * **Speaker Notes:** "Şimdi sistemin canlı olarak nasıl çalıştığına, kuralların nasıl hesaplandığına ve ürettiği dinamik antrenman programına hep birlikte bakalım. Dinlediğiniz için teşekkürler, sorularınız varsa alabilirim."

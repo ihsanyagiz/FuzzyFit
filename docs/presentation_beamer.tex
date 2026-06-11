@@ -129,18 +129,36 @@
   \textit{Note: Under symmetric active rules, all methods yield mathematically consistent outputs, demonstrating system stability.}
 \end{frame}
 
-% Slide 8: Technology Stack \& Web Features
-\begin{frame}{Technology Stack \& Web App Features}
-  Developed using \textbf{Python (scikit-fuzzy) + Streamlit + Plotly} as an alternative to local desktop MATLAB scripts:
+% Slide 8: Sugeno Inference Model
+\begin{frame}{Sugeno Inference Model (Alternative FIS)}
+  To demonstrate mathematical flexibility, the system supports a \textbf{Sugeno-style Fuzzy Inference System}:
   \begin{itemize}
-      \item \textbf{Live Fuzzification Panel:} Visualizes membership percentages in real-time as sliders move.
-      \item \textbf{Interactive 3D surfaces:} Plotly surfaces can be rotated, panned, and zoomed inside any browser.
-      \item \textbf{Dynamic Workout Generator:} Allocates fuzzy volume to selected muscle groups and sets count ($Sets_{total} = \max(3, \lfloor Volume_{strength}/4 \rfloor)$), with an optional cardio split.
-      \item \textbf{Session History & CSV Export:} Log daily recommendations, view progress graphs, and download training data.
+      \item \textbf{Singleton Consequents:} Uses fixed constants instead of fuzzy sets:
+      \begin{itemize}
+          \item Workout Intensity (\%): Very Light (15), Light (35), Moderate (55), High (75), Maximum (95).
+          \item Workout Volume (Min): Low (25), Medium (65), High (105).
+      \end{itemize}
+      \item \textbf{Weighted Average Defuzzification:}
+      \begin{equation*}
+      z_{Sugeno} = \frac{\sum w_k z_k}{\sum w_k}
+      \end{equation*}
+      \item \textbf{Comparison:} Under balanced inputs, Sugeno yields 55.0\% intensity and 78.3 Min, compared to Mamdani's 60.0\% intensity and 79.8 Min.
   \end{itemize}
 \end{frame}
 
-% Slide 9: Live Demo & Q&A
+% Slide 9: Technology Stack \& Web Features
+\begin{frame}{Technology Stack \& Web App Features}
+  Developed using \textbf{Python (scikit-fuzzy) + Streamlit + Plotly} as an alternative to local desktop MATLAB scripts:
+  \begin{itemize}
+      \item \textbf{Preset Profiles:} Instantly loads predefined states (Rested, Exhausted, Post Leg-Day, High Stress) to test system behavior.
+      \item \textbf{Live Fuzzification Panel:} Visualizes membership percentages in real-time as sliders move.
+      \item \textbf{Interactive 3D surfaces:} Plotly surfaces can be rotated, panned, and zoomed inside any browser.
+      \item \textbf{Dynamic Workout Generator:} Allocates fuzzy volume to selected muscle groups and sets count ($Sets_{total} = \max(3, \lfloor Volume_{strength}/4 \rfloor)$), with an optional cardio split.
+      \item \textbf{Session History \& CSV Export:} Log daily recommendations, view progress graphs, and download training data.
+  \end{itemize}
+\end{frame}
+
+% Slide 10: Live Demo & Q&A
 \begin{frame}{Conclusion}
   \begin{center}
       \Large \textbf{Live Demo}
@@ -149,7 +167,7 @@
       \normalsize
       Transitioning to the interactive web application to demonstrate the Fuzzy Inference System in real-time.
       
-      \vspace{1cm}
+      \vspace{1.0cm}
       \Large \textbf{Thank You!} \\
       \normalsize Any Questions?
   \end{center}
