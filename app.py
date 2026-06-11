@@ -25,119 +25,139 @@ if 'stress_val' not in st.session_state:
 # Localization Dictionary
 LANG_DICT = {
     "EN": {
-        "title": "⚡ FuzzyFit",
+        "title": "FuzzyFit",
         "subtitle": "Fuzzy Logic-Powered Smart Workout & Recovery Assistant",
-        "engine_settings": "⚙️ Engine Settings",
+        "presets_header": "Preset Profiles",
+        "preset_select_label": "Select Profile",
+        "preset_custom": "Custom",
+        "preset_rested": "Rested",
+        "preset_exhausted": "Exhausted",
+        "preset_post_leg": "Post Leg-Day",
+        "preset_high_stress": "High Stress",
+        "inference_header": "Inference Model",
+        "model_label": "Model Selection",
+        "engine_settings": "Engine Settings",
         "defuzz_help": "Test different defuzzification methods for the fuzzy inference system.",
         "defuzz_label": "Defuzzification Method",
-        "lang_label": "🌐 Language / Dil",
-        "inputs_header": "📋 Daily Physical Status (Inputs)",
-        "sleep_label": "😴 Sleep Quality",
+        "lang_label": "Language",
+        "inputs_header": "Daily Physical Status",
+        "sleep_label": "Sleep Quality",
         "sleep_help": "0: Very Poor, 10: Excellent",
-        "soreness_label": "🤕 Muscle Soreness & Fatigue",
+        "soreness_label": "Muscle Soreness & Fatigue",
         "soreness_help": "0: No soreness, 10: Severe pain",
-        "energy_label": "⚡ Energy & Nutrition Level",
+        "energy_label": "Energy & Nutrition Level",
         "energy_help": "0: Severe Deficit/Hungry, 10: High Energy/Caloric Surplus",
-        "stress_label": "🤯 Stress Level",
+        "stress_label": "Stress Level",
         "stress_help": "0: Very relaxed, 10: Highly stressed",
-        "live_fuzz": "🔍 Live Fuzzification (Membership Degrees)",
-        "muscles_label": "💪 Target Muscle Groups / Çalışılacak Bölgeler",
-        "cardio_label": "🏃 Add Cardio Session / Kardiyo Ekle",
+        "live_fuzz": "Live Fuzzification (Membership Degrees)",
+        "muscles_label": "Target Muscle Groups",
+        "default_muscles": ["Chest", "Back", "Legs"],
+        "cardio_label": "Add Cardio Session",
         "cardio_help": "If active, 30% of workout volume is allocated to cardio and shown separately.",
-        "outputs_header": "🎯 Workout Recommendation (Outputs)",
+        "outputs_header": "Workout Recommendation",
         "intensity_res": "Recommended Intensity",
         "volume_res": "Recommended Volume",
         "success_msg": "Inference completed dynamically! (Model: {model}, Method: {method})",
-        "protocol_header": "🏃 Actionable Workout Protocol",
-        "cardio_header": "🏃 Cardio Session Finisher",
+        "protocol_header": "Actionable Workout Protocol",
+        "cardio_header": "Cardio Session Finisher",
         "cardio_activity": "Cardio Session (Run/Cycle/Row)",
         "cardio_intensity_mod": "Zone 2 (~{intensity:.0f}% Max HR / RPE 6)",
         "cardio_intensity_high": "HIIT Intervals (~{intensity:.0f}% Max HR / RPE 9)",
-        "save_log_btn": "💾 Save Recommendation to History Log",
+        "save_log_btn": "Save Recommendation to History Log",
         "save_success": "Workout logged successfully! Check the history dashboard at the bottom.",
-        "comp_header": "### 📊 Defuzzification Methods Comparison (Mamdani Only)",
+        "comp_header": "### Defuzzification Methods Comparison (Mamdani Only)",
         "comp_desc": "See how different mathematical techniques compute Workout Intensity and Workout Volume given your current physical inputs.",
         "comp_table_title": "Comparison Table",
         "comp_chart_title": "Comparison Chart",
-        "details_header": "🔍 Show Fuzzy Logic Details (Fuzzification & Defuzzification Graphs)",
+        "details_header": "Show Fuzzy Logic Details (Fuzzification & Defuzzification Graphs)",
         "details_desc": "The black vertical line represents the Crisp (Defuzzified) value.",
         "int_out": "#### Intensity Output",
         "vol_out": "#### Volume Output",
         "input_fuzz": "#### Input Variables (Fuzzification)",
-        "surf_header": "### 📈 Interactive 3D Control Surfaces",
+        "surf_header": "### Interactive 3D Control Surfaces",
         "surf_desc": "Visualize how two primary inputs affect the output in 3D. Fixed variables are automatically synced with the sliders above!",
         "surf_fixed_soreness_stress": "**Current Fixed Variables:** Muscle Soreness = {soreness:.1f}, Stress = {stress:.1f}",
         "surf_fixed_energy_stress": "**Current Fixed Variables:** Energy Level = {energy:.1f}, Stress = {stress:.1f}",
         "gen_plot_btn_int": "Generate Intensity 3D Plot (~3s)",
         "gen_plot_btn_vol": "Generate Volume 3D Plot (~3s)",
         "calc_surf": "Calculating 3D Surface...",
-        "history_header": "📅 Workout History & Analytics Dashboard",
+        "history_header": "### Workout History & Analytics Dashboard",
         "history_desc": "Track your workouts over time. Each saved configuration is logged below with detailed charts.",
         "history_empty": "No logs saved yet. Click the 'Save Recommendation to History Log' button above to save your first training recommendation!",
         "history_table_title": "Saved Workouts Log",
-        "export_csv_btn": "📥 Export History as CSV",
+        "export_csv_btn": "Export History as CSV",
         "history_chart_title": "Performance Trend Chart",
         "exercise_cols": ["Muscle Group", "Exercise", "Sets", "Reps / Duration", "Target Load / RPE"],
         "cardio_cols": ["Activity", "Duration", "Intensity"],
-        "routine_title": "🏃 Workout Routine ({total_sets} Total Strength Sets)",
+        "routine_title": "Workout Routine ({total_sets} Total Strength Sets)",
         "sugeno_msg": "Output membership graphs are specific to Mamdani inference. In Sugeno inference, outputs are calculated as weighted averages of constant singletons: Intensity (Very Light=15%, Light=35%, Moderate=55%, High=75%, Maximum=95%) and Volume (Low=25, Medium=65, High=105 Min)."
     },
     "TR": {
-        "title": "⚡ FuzzyFit",
+        "title": "FuzzyFit",
         "subtitle": "Bulanık Mantık Destekli Akıllı Antrenman ve Yenilenme Asistanı",
-        "engine_settings": "⚙️ Motor Ayarları",
+        "presets_header": "Hazır Profiller",
+        "preset_select_label": "Profil Seçin",
+        "preset_custom": "Özel",
+        "preset_rested": "Dinlenmiş",
+        "preset_exhausted": "Çok Yorgun",
+        "preset_post_leg": "Bacak Sonrası",
+        "preset_high_stress": "Yüksek Stres",
+        "inference_header": "Çıkarım Modeli",
+        "model_label": "Model Seçimi",
+        "engine_settings": "Motor Ayarları",
         "defuzz_help": "Bulanık çıkarım sistemi için farklı durulaştırma yöntemlerini test edin.",
         "defuzz_label": "Durulaştırma Yöntemi",
-        "lang_label": "🌐 Dil / Language",
-        "inputs_header": "📋 Günlük Fiziksel Durum (Girdiler)",
-        "sleep_label": "😴 Uyku Kalitesi",
+        "lang_label": "Dil",
+        "inputs_header": "Günlük Fiziksel Durum",
+        "sleep_label": "Uyku Kalitesi",
         "sleep_help": "0: Çok Kötü, 10: Mükemmel",
-        "soreness_label": "🤕 Kas Ağrısı ve Yorgunluk",
+        "soreness_label": "Kas Ağrısı ve Yorgunluk",
         "soreness_help": "0: Ağrı yok, 10: Şiddetli acı",
-        "energy_label": "⚡ Enerji ve Beslenme Seviyesi",
+        "energy_label": "Enerji ve Beslenme Seviyesi",
         "energy_help": "0: Ciddi Kalori Açığı/Açlık, 10: Yüksek Enerji/Kalori Fazlası",
-        "stress_label": "🤯 Stres Seviyesi",
+        "stress_label": "Stres Seviyesi",
         "stress_help": "0: Çok rahat, 10: Çok stresli",
-        "live_fuzz": "🔍 Canlı Bulanıklaştırma (Üyelik Dereceleri)",
-        "muscles_label": "💪 Çalışılacak Kas Grupları / Bölgeler",
-        "cardio_label": "🏃 Kardiyo Seansı Ekle",
+        "live_fuzz": "Canlı Bulanıklaştırma (Üyelik Dereceleri)",
+        "muscles_label": "Çalışılacak Kas Grupları",
+        "default_muscles": ["Göğüs", "Sırt", "Bacak"],
+        "cardio_label": "Kardiyo Seansı Ekle",
         "cardio_help": "Aktif edilirse, antrenman süresinin %30'u kardiyoya ayrılır ve ayrı gösterilir.",
-        "outputs_header": "🎯 Antrenman Tavsiyesi (Çıktılar)",
+        "outputs_header": "Antrenman Tavsiyesi",
         "intensity_res": "Önerilen Yoğunluk",
         "volume_res": "Önerilen Süre",
         "success_msg": "Bulanık çıkarım dinamik olarak hesaplandı! (Model: {model}, Yöntem: {method})",
-        "protocol_header": "🏃 Uygulanabilir Antrenman Programı",
-        "cardio_header": "🏃 Kardiyo Bitirici Seansı",
+        "protocol_header": "Uygulanabilir Antrenman Programı",
+        "cardio_header": "Kardiyo Bitirici Seansı",
         "cardio_activity": "Kardiyo Seansı (Koşu/Bisiklet/Kürek)",
         "cardio_intensity_mod": "Zone 2 (~%{intensity:.0f} Maks Nabız / RPE 6)",
         "cardio_intensity_high": "HIIT İnterval (~%{intensity:.0f} Maks Nabız / RPE 9)",
-        "save_log_btn": "💾 Öneriyi Günlüğe Kaydet",
+        "save_log_btn": "Öneriyi Günlüğe Kaydet",
         "save_success": "Antrenman başarıyla kaydedildi! Sayfanın altındaki geçmiş panelini inceleyin.",
-        "comp_header": "### 📊 Durulaştırma Yöntemlerinin Karşılaştırması (Sadece Mamdani)",
+        "comp_header": "### Durulaştırma Yöntemlerinin Karşılaştırması (Sadece Mamdani)",
         "comp_desc": "Farklı matematiksel durulaştırma tekniklerinin o anki girdilere göre Yoğunluk ve Süreyi nasıl hesapladığını görün.",
         "comp_table_title": "Karşılaştırma Tablosu",
         "comp_chart_title": "Karşılaştırma Grafiği",
-        "details_header": "🔍 Bulanık Mantık Detaylarını Göster (Bulanıklaştırma ve Durulaştırma Grafikleri)",
+        "details_header": "Bulanık Mantık Detaylarını Göster (Bulanıklaştırma ve Durulaştırma Grafikleri)",
         "details_desc": "Siyah dikey çizgi durulaştırılmış net (crisp) değeri temsil eder.",
         "int_out": "#### Yoğunluk Çıktısı",
         "vol_out": "#### Süre Çıktısı",
         "input_fuzz": "#### Girdi Değişkenleri (Bulanıklaştırma)",
-        "surf_header": "### 📈 Etkileşimli 3D Karar Yüzeyleri",
+        "surf_header": "### Etkileşimli 3D Karar Yüzeyleri",
         "surf_desc": "İki temel girdinin çıktıyı 3D uzayda nasıl etkilediğini görselleştirin. Sabit tutulan girdiler yukarıdaki slider'lar ile senkronizedir!",
         "surf_fixed_soreness_stress": "**Sabit Tutulan Değişkenler:** Kas Ağrısı = {soreness:.1f}, Stres = {stress:.1f}",
         "surf_fixed_energy_stress": "**Sabit Tutulan Değişkenler:** Enerji Seviyesi = {energy:.1f}, Stres = {stress:.1f}",
         "gen_plot_btn_int": "Yoğunluk 3D Grafiğini Çiz (~3sn)",
         "gen_plot_btn_vol": "Süre 3D Grafiğini Çiz (~3sn)",
         "calc_surf": "3D Karar Yüzeyi Hesaplanıyor...",
-        "history_header": "📅 Antrenman Geçmişi ve Analiz Paneli",
+        "history_header": "### Antrenman Geçmişi ve Analiz Paneli",
         "history_desc": "Antrenmanlarınızı zaman içinde takip edin. Kaydedilen her öneri aşağıdaki grafikte görselleştirilir.",
         "history_empty": "Henüz kayıtlı antrenman yok. İlk öneriyi kaydetmek için yukarıdaki 'Öneriyi Günlüğe Kaydet' butonuna basın!",
         "history_table_title": "Kaydedilen Antrenman Günlüğü",
-        "export_csv_btn": "📥 Geçmişi CSV Olarak İndir",
+        "export_csv_btn": "Geçmişi CSV Olarak İndir",
         "history_chart_title": "Performans Trend Grafiği",
         "exercise_cols": ["Çalışılan Bölge", "Egzersiz", "Set Sayısı", "Tekrar / Süre", "Hedef Ağırlık / RPE"],
         "cardio_cols": ["Aktivite", "Süre", "Yoğunluk"],
-        "routine_title": "🏃 Antrenman Programı ({total_sets} Toplam Güç Seti)",
+        "routine_title": "Antrenman Programı ({total_sets} Toplam Güç Seti)",
         "sugeno_msg": "Çıktı üyelik grafikleri Mamdani çıkarımına özeldir. Sugeno çıkarımında çıktılar, sabit tekil değerlerin (singletons) ağırlıklı ortalaması olarak hesaplanır: Yoğunluk (Çok Hafif=15, Hafif=35, Orta=55, Yüksek=75, Maksimum=95) ve Süre (Düşük=25, Orta=65, Yüksek=105 Dk)."
     }
 }
@@ -199,7 +219,7 @@ header_left, header_right = st.columns([6, 1])
 
 with header_right:
     # Small, clean selector placed at the top-right
-    lang = st.selectbox("Language / Dil Selection", ["EN", "TR"], label_visibility="collapsed")
+    lang = st.selectbox("Language Selection", ["EN", "TR"], key="lang_selector", label_visibility="collapsed")
     t = LANG_DICT[lang]
 
 with header_left:
@@ -207,15 +227,15 @@ with header_left:
     st.markdown(f'<p class="sub-text" style="margin-top: -5px; margin-bottom: 20px;">{t["subtitle"]}</p>', unsafe_allow_html=True)
 
 # Sidebar for Preset Profiles
-st.sidebar.header("📋 Preset Profiles / Hazır Durumlar")
+st.sidebar.header(t["presets_header"])
 preset_options = {
-    "Custom / Özel": "Custom",
-    "Rested / Dinlenmiş": "Rested",
-    "Exhausted / Çok Yorgun": "Exhausted",
-    "Post Leg-Day / Bacak Sonrası": "Post Leg-Day",
-    "High Stress / Yüksek Stres": "High Stress"
+    t["preset_custom"]: "Custom",
+    t["preset_rested"]: "Rested",
+    t["preset_exhausted"]: "Exhausted",
+    t["preset_post_leg"]: "Post Leg-Day",
+    t["preset_high_stress"]: "High Stress"
 }
-preset_select = st.sidebar.selectbox("Select Profile / Profil Seçin", list(preset_options.keys()))
+preset_select = st.sidebar.selectbox(t["preset_select_label"], list(preset_options.keys()))
 
 presets_data = {
     "Custom": None,
@@ -234,8 +254,8 @@ if selected_preset != "Custom":
     st.session_state.stress_val = preset_vals["stress"]
 
 # Sidebar for Inference Model (Mamdani vs Sugeno)
-st.sidebar.header("🔀 Inference Model / Çıkarım Modeli")
-model_type = st.sidebar.selectbox("Model Selection", ["Mamdani", "Sugeno"], 
+st.sidebar.header(t["inference_header"])
+model_type = st.sidebar.selectbox(t["model_label"], ["Mamdani", "Sugeno"], 
                                    help="Mamdani outputs are fuzzy sets. Sugeno outputs are weighted singletons.")
 
 # Sidebar for Defuzzification Settings
@@ -258,8 +278,19 @@ col1, col2 = st.columns([1, 1], gap="large")
 
 # Muscle Group translations mapping for display and database
 MUSCLES_LOC = {
-    "EN": ["Chest (Göğüs)", "Back (Sırt)", "Shoulders (Omuz)", "Legs (Bacak)", "Biceps (Pazı)", "Triceps (Arka Kol)", "Core (Karın)"],
-    "TR": ["Chest (Göğüs)", "Back (Sırt)", "Shoulders (Omuz)", "Legs (Bacak)", "Biceps (Pazı)", "Triceps (Arka Kol)", "Core (Karın)"]
+    "EN": ["Chest", "Back", "Shoulders", "Legs", "Biceps", "Triceps", "Core"],
+    "TR": ["Göğüs", "Sırt", "Omuz", "Bacak", "Biceps", "Triceps", "Karın"]
+}
+
+CANONICAL_MUSCLES = {
+    "EN": {
+        "Chest": "Chest", "Back": "Back", "Shoulders": "Shoulders", "Legs": "Legs", 
+        "Biceps": "Biceps", "Triceps": "Triceps", "Core": "Core"
+    },
+    "TR": {
+        "Göğüs": "Chest", "Sırt": "Back", "Omuz": "Shoulders", "Bacak": "Legs", 
+        "Biceps": "Biceps", "Triceps": "Triceps", "Karın": "Core"
+    }
 }
 
 with col1:
@@ -333,38 +364,38 @@ with col1:
         # Target Muscle Groups selection
         target_muscles = st.multiselect(t["muscles_label"],
                                         MUSCLES_LOC[lang],
-                                        default=["Chest (Göğüs)", "Back (Sırt)", "Legs (Bacak)"])
+                                        default=t["default_muscles"])
         
         # Add Cardio checkbox
         add_cardio = st.checkbox(t["cardio_label"], value=False, help=t["cardio_help"])
 
 # Pool of general exercises for each muscle group (with TR/EN display versions)
 EXERCISE_POOL = {
-    "Chest (Göğüs)": {
+    "Chest": {
         "EN": ["Flat Barbell Bench Press", "Incline Dumbbell Press", "Pec Deck Flyes", "Dumbbell Flat Bench Press"],
         "TR": ["Düz Bar Bench Press", "Eğimli Dambıl Bench Press", "Pec Deck Kelebek Fly", "Düz Sehpa Dambıl Bench Press"]
     },
-    "Back (Sırt)": {
+    "Back": {
         "EN": ["Pull-ups / Lat Pulldown", "Bent-over Barbell Row", "Seated Cable Row", "Conventional Deadlift"],
         "TR": ["Barfiks / Lat Pulldown", "Eğilerek Barbell Row", "Oturarak Seated Cable Row", "Klasik Deadlift"]
     },
-    "Shoulders (Omuz)": {
+    "Shoulders": {
         "EN": ["Barbell Overhead Press (OHP)", "Dumbbell Lateral Raise", "Face Pulls", "Seated Dumbbell Shoulder Press"],
         "TR": ["Barbell Overhead Press (OHP)", "Dambıl Lateral Omuz Açış", "Face Pulls (Arka Omuz)", "Oturarak Dambıl Omuz Press"]
     },
-    "Legs (Bacak)": {
+    "Legs": {
         "EN": ["Barbell Back Squat", "Romanian Deadlift (RDL)", "Leg Press", "Leg Extensions / Curls"],
         "TR": ["Barbell Back Squat", "Romen Deadlift (RDL)", "Leg Press Makinesi", "Bacak Açma ve Bükme (Extensions/Curls)"]
     },
-    "Biceps (Pazı)": {
+    "Biceps": {
         "EN": ["Barbell Bicep Curl", "Dumbbell Hammer Curl", "Incline Dumbbell Curl", "Cable Curls"],
         "TR": ["Barbell Biceps Curls", "Dambıl Çekiç Curls (Hammer)", "Eğimli Sehpa Dambıl Curls", "Kablo Curls"]
     },
-    "Triceps (Arka Kol)": {
+    "Triceps": {
         "EN": ["Close-grip Bench Press / Dips", "Cable Tricep Pushdown", "Lying Tricep Extensions (Skullcrushers)", "Overhead Dumbbell Extension"],
         "TR": ["Dar Tutuş Bench Press / Dips", "Kablo Triceps Pushdown", "Alına Triceps Extension (Skullcrusher)", "Baş Üstü Dambıl Extension"]
     },
-    "Core (Karın)": {
+    "Core": {
         "EN": ["Hanging Leg Raise", "Plank (Bodyweight Plank)", "Ab Wheel Rollouts", "Russian Twists"],
         "TR": ["Bara Asılı Bacak Kaldırma (Hanging)", "Plank Duruşu", "Karın Tekerleği (Ab Wheel)", "Rus Rotasyonu (Russian Twist)"]
     }
@@ -408,7 +439,7 @@ def generate_workout_routine_dynamic(intensity, volume, target_muscles, add_card
     total_sets = max(3, int(strength_min / 4))
     
     # 4. Allocate Sets to Selected Muscles
-    selected_muscles = target_muscles if target_muscles else ["Chest (Göğüs)", "Back (Sırt)", "Legs (Bacak)"]
+    selected_muscles = target_muscles if target_muscles else t["default_muscles"]
     N = len(selected_muscles)
     
     sets_per_muscle = total_sets // N
@@ -419,12 +450,7 @@ def generate_workout_routine_dynamic(intensity, volume, target_muscles, add_card
     for idx, muscle in enumerate(selected_muscles):
         muscle_sets_target = sets_per_muscle + (1 if idx < remainder else 0)
         
-        canonical_key = "Chest (Göğüs)"
-        for k in EXERCISE_POOL.keys():
-            if k.split(" ")[0].lower() in muscle.lower():
-                canonical_key = k
-                break
-                
+        canonical_key = CANONICAL_MUSCLES[lang].get(muscle, "Chest")
         pool = EXERCISE_POOL[canonical_key][lang]
         num_exercises = max(1, int(np.ceil(muscle_sets_target / 4.0)))
         
@@ -443,7 +469,7 @@ def generate_workout_routine_dynamic(intensity, volume, target_muscles, add_card
                 current_reps = "30-60 sec hold" if lang == "EN" else "30-60 sn bekleme"
                 
             exercises.append({
-                "Muscle Group": muscle.split(" ")[0] if lang == "EN" else (muscle.split(" ")[1].strip("()") if len(muscle.split(" ")) > 1 else muscle),
+                "Muscle Group": muscle,
                 "Exercise": ex_name,
                 "Sets": str(ex_sets),
                 "Reps / Duration": current_reps,
@@ -520,7 +546,7 @@ with col2:
                 "Muscle Soreness": soreness_val,
                 "Energy Level": energy_val,
                 "Stress Level": stress_val,
-                "Target Muscles": ", ".join([m.split(" ")[0] if lang == "EN" else m.split(" ")[-1].strip("()") for m in target_muscles]),
+                "Target Muscles": ", ".join(target_muscles),
                 "Cardio Included": "Yes" if add_cardio else "No",
                 "Inference Model": model_type,
                 "Defuzz Method": defuzz_method.upper() if model_type == "Mamdani" else "WEIGHTED AVG",
@@ -528,7 +554,7 @@ with col2:
                 "Volume (Min)": round(volume_res, 1)
             }
             st.session_state.workout_logs.append(log_entry)
-            st.toast(t["save_success"], icon="💾")
+            st.toast(t["save_success"])
 
 # Defuzzification Comparison Panel (Only visible for Mamdani)
 if model_type == "Mamdani":
@@ -680,7 +706,7 @@ col_3d_1, col_3d_2 = st.columns(2, gap="large")
 
 with col_3d_1:
     with st.container(border=True):
-        st.markdown("#### Sleep vs Energy ➡️ Intensity")
+        st.markdown("#### Sleep & Energy vs Intensity")
         st.markdown(t["surf_fixed_soreness_stress"].format(soreness=soreness_val, stress=stress_val))
         
         if st.button(t["gen_plot_btn_int"]):
@@ -716,7 +742,7 @@ with col_3d_1:
 
 with col_3d_2:
     with st.container(border=True):
-        st.markdown("#### Sleep vs Soreness ➡️ Volume")
+        st.markdown("#### Sleep & Soreness vs Volume")
         st.markdown(t["surf_fixed_energy_stress"].format(energy=energy_val, stress=stress_val))
         
         if st.button(t["gen_plot_btn_vol"]):
